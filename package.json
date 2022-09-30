@@ -1,6 +1,6 @@
 {
   "name": "passport-spid",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "Passport strategy for SPID authentication",
   "repository": {
     "type": "git",
@@ -16,9 +16,15 @@
     "passport",
     "saml",
     "saml2",
-    "authentication"
+    "authentication",
+    "italia",
+    "italy"
   ],
   "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist/**"
+  ],
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only -- src/example.ts",
     "prebuild": "rimraf dist",
