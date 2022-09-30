@@ -72,6 +72,9 @@ export class SpidStrategy extends MultiSamlStrategy {
       signonVerify,
       logoutVerify,
     );
+    config.spid.serviceProvider.publicCert = cleanPem(
+      config.spid.serviceProvider.publicCert,
+    );
     this._spidConfig = config;
     this.name = config.name || 'spid';
   }
@@ -153,7 +156,7 @@ export class SpidStrategy extends MultiSamlStrategy {
       super.generateServiceProviderMetadata(
         {} as any,
         null,
-        cleanPem(config.spid.serviceProvider.publicCert),
+        config.spid.serviceProvider.publicCert,
         (err, xml) => {
           if (err) rej(err);
           else
