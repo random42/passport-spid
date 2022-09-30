@@ -122,7 +122,7 @@ export interface SpidSamlConfig extends Omit<SamlConfig, OmitSamlConfig> {
   privateKey: string | Buffer;
   authnContext: SpidLevel[];
   signatureAlgorithm: SignatureAlgorithm;
-  logoutCallbackUrl?: string;
+  logoutCallbackUrl: string;
   requestIdExpirationPeriodMs?: number;
 }
 
