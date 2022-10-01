@@ -2,7 +2,7 @@ import express from 'express';
 import { promises as fs } from 'fs';
 import Redis from 'ioredis';
 import passport from 'passport';
-import { SpidStrategy, SpidConfig, SpidProfile, SamlSpidProfile } from '.';
+import { SpidStrategy, SpidConfig, SamlSpidProfile } from '../src';
 
 async function run() {
   const redis = new Redis();
