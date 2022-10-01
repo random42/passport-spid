@@ -1,6 +1,6 @@
 {
   "name": "passport-spid",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Passport strategy for SPID authentication",
   "repository": {
     "type": "git",
@@ -20,13 +20,13 @@
     "italia",
     "italy"
   ],
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "dist/src/index.js",
+  "types": "dist/src/index.d.ts",
   "files": [
-    "dist/**"
+    "dist/src/**"
   ],
   "scripts": {
-    "dev": "ts-node-dev --respawn --transpile-only -- src/example.ts",
+    "dev": "ts-node-dev --respawn --transpile-only -- examples/main.ts",
     "prebuild": "rimraf dist",
     "build": "tsc",
     "prepare": "run-s build",
@@ -35,7 +35,7 @@
     "test": "jest"
   },
   "dependencies": {
-    "@node-saml/node-saml": "git+https://github.com/node-saml/node-saml#v4.0.0-beta.4",
+    "@node-saml/node-saml": "github:node-saml/node-saml#v4.0.0-beta.4",
     "@node-saml/passport-saml": "^4.0.0-beta.2",
     "cheerio": "^1.0.0-rc.12",
     "cssesc": "^3.0.0",

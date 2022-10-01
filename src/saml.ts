@@ -1,6 +1,4 @@
 import { SAML, SamlConfig } from '@node-saml/node-saml';
-import { generateAuthorizeRequestAsync } from '@node-saml/node-saml/lib/saml/generate';
-import { processValidlySignedAssertionAsync } from '@node-saml/node-saml/lib/saml/process';
 import { SpidRequest } from './request';
 import { SamlSpidProfile, SpidConfig } from './types';
 
@@ -9,14 +7,13 @@ export class SpidSAML extends SAML {
     super(samlConfig);
   }
 
-  protected generateAuthorizeRequestAsync = async (
+  protected async generateAuthorizeRequestAsync(
     isPassive: boolean,
     isHttpPostBinding: boolean,
     host: string,
-  ): Promise<string> => {
+  ): Promise<string> {
     // cannot use super because these are instance functions
-    const xml = await generateAuthorizeRequestAsync.call(
-      this,
+    const xml = await super.generateAuthorizeRequestAsync(
       isPassive,
       isHttpPostBinding,
       host,
@@ -36,13 +33,13 @@ export class SpidSAML extends SAML {
       }, timeoutMs);
     }
     return final;
-  };
+  }
 
-  protected processValidlySignedAssertionAsync = async (
+  protected async processValidlySignedAssertionAsync(
     xml: string,
     samlResponseXml: string,
     inResponseTo: string,
-  ): Promise<{ profile: SamlSpidProfile; loggedOut: boolean }> => {
+  ): Promise<{ profile: SamlSpidProfile; loggedOut: boolean }> {
     if (!inResponseTo) {
       throw new Error(`Missing InResponseTo`);
     }
@@ -53,8 +50,7 @@ export class SpidSAML extends SAML {
     }
     await cache.delete(inResponseTo);
     const { profile, loggedOut } =
-      await processValidlySignedAssertionAsync.call(
-        this,
+      await super.processValidlySignedAssertionAsync(
         xml,
         samlResponseXml,
         inResponseTo,
@@ -62,5 +58,5 @@ export class SpidSAML extends SAML {
     const p = profile as SamlSpidProfile;
     p.getSamlRequestXml = () => reqXml;
     return { profile: p, loggedOut };
-  };
+  }
 }
