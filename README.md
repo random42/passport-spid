@@ -1,6 +1,18 @@
 # passport-spid
 
+[![npm package][npm-img]][npm-url]
+[![Downloads][downloads-img]][downloads-url]
+
 > A passport strategy for [SPID](https://developers.italia.it/it/spid/), an extension of the SAML2 protocol.
+
+## Features
+
+- Passport strategy only
+- Built on the latest versions of [node-saml](https://github.com/node-saml/node-saml) and [passport-saml](https://github.com/node-saml/passport-saml)
+- Full typings for the SPID metadata specs
+- Custom SAML options, if SPID compliant
+- Custom request cache
+- Custom function to get Identity Providers' registry XML
 
 ## Install
 
@@ -10,12 +22,12 @@ npm i passport-spid
 
 ## Usage
 
-```typescript:src/example.ts
+```typescript
 import express from 'express';
 import { promises as fs } from 'fs';
 import Redis from 'ioredis';
 import passport from 'passport';
-import { SpidStrategy, SpidConfig, SpidProfile, SamlSpidProfile } from 'passport-spid';
+import { SpidStrategy, SpidConfig, Cache, SamlSpidProfile } from 'passport-spid';
 
 async function run() {
   const redis = new Redis();
@@ -25,10 +37,10 @@ async function run() {
   const privateKey = (await fs.readFile('./var/keys/key.pem')).toString();
   const spCert = (await fs.readFile('./var/keys/crt.pem')).toString();
   const email = 'asd@example.com';
-  // you can use a normal Map (not recommended)
+  // you can use a normal Map (not recommended for scaling applications)
   // const cache = new Map();
   const cachePrefix = 'spid_request_';
-  const cache: SpidConfig['cache'] = {
+  const cache: Cache = {
     get(key: string) {
       return redis.get(cachePrefix + key);
     },
@@ -121,3 +133,8 @@ async function run() {
   );
 }
 ```
+
+[downloads-img]:https://img.shields.io/npm/dt/passport-spid
+[downloads-url]:https://www.npmtrends.com/passport-spid
+[npm-img]:https://img.shields.io/npm/v/passport-spid
+[npm-url]:https://www.npmjs.com/package/passport-spid
