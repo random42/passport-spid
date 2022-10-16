@@ -35,8 +35,8 @@
     "test": "jest"
   },
   "dependencies": {
-    "@node-saml/node-saml": "github:node-saml/node-saml#v4.0.0-beta.4",
-    "@node-saml/passport-saml": "^4.0.0-beta.2",
+    "@node-saml/node-saml": "github:node-saml/node-saml#8b7b80780414defa6f529a21a286b57218222c1a",
+    "@node-saml/passport-saml": "github:node-saml/passport-saml#d74aaa644b7b71f06a0b50cc675157d028151bf2",
     "cheerio": "^1.0.0-rc.12",
     "cssesc": "^3.0.0",
     "fast-xml-parser": "^4.0.8",
