@@ -1,10 +1,23 @@
 version: "3.9"
 services:
+  server:
+    build: .
+    command: "npm run dev" 
+    depends_on:
+      - spid
+      - redis
+    ports:
+      - "4000:4000"
+      - "9229:9229"
+    volumes:
+      - ./src:/app/src
+      - ./var:/app/var
+      - ./examples:/app/examples
   spid:
-    image: "italia/spid-saml-check:1.9.0"
+    image: "italia/spid-saml-check:1.9.2"
     ports:
       - "8443:8443"
   redis:
     image: "redis:7"
-    ports:
-      - "6379:6379"
+    # ports:
+    #   - "6379:6379"

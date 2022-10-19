@@ -1,0 +1,6 @@
+*
+!src/
+!scripts/
+!examples/
+!package*.json
+!tsconfig.json

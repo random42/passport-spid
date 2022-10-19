@@ -5,7 +5,7 @@ import passport from 'passport';
 import { SpidStrategy, SpidConfig, SamlSpidProfile } from '../src';
 
 async function run() {
-  const redis = new Redis();
+  const redis = new Redis('redis://redis');
   const idpMetadata = (await fs.readFile('./var/idp.xml')).toString();
   const sp = 'http://localhost:4000';
   const idp = 'https://localhost:8443/demo';
@@ -122,7 +122,7 @@ async function run() {
   app.listen(4000, () => {
     console.log(sp);
     console.log(idp);
-    console.log('http://host.docker.internal:4000/');
+    console.log('http://server:4000/');
   });
 }
 
