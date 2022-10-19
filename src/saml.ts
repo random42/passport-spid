@@ -48,7 +48,7 @@ export class SpidSAML extends SAML {
     if (!reqXml) {
       throw new Error(`Missing request for ${inResponseTo} response`);
     }
-    await cache.delete(inResponseTo);
+    // await cache.delete(inResponseTo);
     const { profile, loggedOut } =
       await super.processValidlySignedAssertionAsync(
         xml,

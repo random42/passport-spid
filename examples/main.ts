@@ -1,14 +1,20 @@
 import express from 'express';
 import { promises as fs } from 'fs';
 import Redis from 'ioredis';
+import axios from 'axios';
 import passport from 'passport';
 import { SpidStrategy, SpidConfig, SamlSpidProfile } from '../src';
 
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+
 async function run() {
+  const app = express();
+  // if (1) return;
   const redis = new Redis('redis://redis');
-  const idpMetadata = (await fs.readFile('./var/idp.xml')).toString();
+  const idp = 'https://localhost:8443';
+  const idpMetadataUrl = 'https://spid:8443/metadata.xml';
+  const idpMetadata = (await axios(idpMetadataUrl)).data;
   const sp = 'http://localhost:4000';
-  const idp = 'https://localhost:8443/demo';
   const privateKey = (await fs.readFile('./var/keys/key.pem')).toString();
   const spCert = (await fs.readFile('./var/keys/crt.pem')).toString();
   const email = 'asd@example.com';
@@ -38,7 +44,8 @@ async function run() {
       authnContext: ['SpidL1'],
       racComparison: 'minimum',
       privateKey,
-      requestIdExpirationPeriodMs: 30000,
+      audience: sp,
+      requestIdExpirationPeriodMs: 3000000,
     },
     spid: {
       getIDPEntityIdFromRequest: (req) => idp,
@@ -81,7 +88,6 @@ async function run() {
   const passportOptions = {
     session: false,
   };
-  const app = express();
   app.use(
     express.json(),
     (req, res, next) => {
@@ -126,4 +132,4 @@ async function run() {
   });
 }
 
-run();
+run().catch(console.error);
