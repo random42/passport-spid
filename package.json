@@ -26,7 +26,7 @@
     "dist/src/**"
   ],
   "scripts": {
-    "dev": "ts-node-dev --poll --cls --respawn --inspect -- examples/main.ts",
+    "dev": "ts-node-dev --poll --respawn --inspect=0.0.0.0:9229 -- examples/main.ts",
     "prebuild": "rimraf dist",
     "build": "tsc",
     "prepare": "run-s build",
@@ -39,6 +39,7 @@
     "@node-saml/passport-saml": "github:node-saml/passport-saml#d74aaa644b7b71f06a0b50cc675157d028151bf2",
     "cheerio": "^1.0.0-rc.12",
     "cssesc": "^3.0.0",
+    "dayjs": "^1.11.5",
     "fast-xml-parser": "^4.0.8",
     "xml-crypto": "^2.1.3"
   },

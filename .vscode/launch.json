@@ -1,0 +1,14 @@
+{
+  "configurations": [
+    {
+      "type": "node",
+      "name": "main",
+      "request": "attach",
+      "port": 9229,
+      "localRoot": "${workspaceFolder}",
+      "sourceMaps": true,
+      "remoteRoot": "/app",
+      "restart": true
+    }
+  ]
+}

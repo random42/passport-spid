@@ -1,6 +1,8 @@
 import { SAML, SamlConfig } from '@node-saml/node-saml';
 import { SpidRequest } from './request';
+import fs from 'fs';
 import { SamlSpidProfile, SpidConfig } from './types';
+import { SpidResponse } from './response';
 
 export class SpidSAML extends SAML {
   constructor(samlConfig: SamlConfig, private spidConfig: SpidConfig) {
@@ -48,6 +50,9 @@ export class SpidSAML extends SAML {
     if (!reqXml) {
       throw new Error(`Missing request for ${inResponseTo} response`);
     }
+    const req = new SpidRequest(reqXml);
+    const res = new SpidResponse(samlResponseXml);
+    // TODO use back
     // await cache.delete(inResponseTo);
     const { profile, loggedOut } =
       await super.processValidlySignedAssertionAsync(
@@ -55,6 +60,11 @@ export class SpidSAML extends SAML {
         samlResponseXml,
         inResponseTo,
       );
+    // TODO remove
+    // fs.writeFileSync('./var/req.xml', reqXml);
+    fs.writeFileSync('./var/res.xml', samlResponseXml);
+
+    res.validate(req, this.spidConfig, this.options);
     const p = profile as SamlSpidProfile;
     p.getSamlRequestXml = () => reqXml;
     return { profile: p, loggedOut };

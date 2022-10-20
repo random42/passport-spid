@@ -123,7 +123,6 @@ export interface SpidSamlConfig extends Omit<SamlConfig, OmitSamlConfig> {
   authnContext: SpidLevel[];
   signatureAlgorithm: SignatureAlgorithm;
   logoutCallbackUrl: string;
-  requestIdExpirationPeriodMs?: number;
 }
 
 export interface Cache {

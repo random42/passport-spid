@@ -29,10 +29,11 @@ async function run() {
       return redis.set(cachePrefix + key, value);
     },
     delete(key: string) {
-      return redis.del(cachePrefix + key);
+      // return redis.del(cachePrefix + key);
     },
     expire(key: string, ms: number) {
-      return redis.pexpire(cachePrefix + key, ms);
+      console.log(`expire ${key} ${ms}`);
+      // return redis.pexpire(cachePrefix + key, ms);
     },
   };
   const config: SpidConfig = {
@@ -45,7 +46,6 @@ async function run() {
       racComparison: 'minimum',
       privateKey,
       audience: sp,
-      requestIdExpirationPeriodMs: 3000000,
     },
     spid: {
       getIDPEntityIdFromRequest: (req) => idp,
@@ -123,7 +123,7 @@ async function run() {
   );
   app.use((err, req, res, next) => {
     console.error(err);
-    res.sendStatus(500);
+    res.status(500).send(err?.message);
   });
   app.listen(4000, () => {
     console.log(sp);
