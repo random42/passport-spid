@@ -2,19 +2,12 @@ import {
   AbstractStrategy,
   MultiSamlStrategy,
   SamlConfig,
-  Strategy,
 } from '@node-saml/passport-saml';
 import { Request } from 'express';
 import { callbackify } from 'util';
-import { IDPMetadata } from './idp-metadata';
+import { getIdentityProviders } from './idp-metadata';
 import { SPMetadata } from './sp-metadata';
-import {
-  IDPConfig,
-  SamlSpidProfile,
-  SpidConfig,
-  SpidLevel,
-  SpidProfile,
-} from './types';
+import { IDPConfig, SamlSpidProfile, SpidConfig } from './types';
 import {
   SPID_LEVELS,
   SPID_FORCED_SAML_CONFIG,
@@ -50,7 +43,7 @@ const cleanPem = (cert: string) =>
     .replace(/\r?\n/g, '');
 
 export class SpidStrategy extends MultiSamlStrategy {
-  private _spidIDPSConfig: IDPConfig[];
+  private idps: IDPConfig[];
   private _spidConfig: SpidConfig;
 
   constructor(
@@ -77,14 +70,11 @@ export class SpidStrategy extends MultiSamlStrategy {
     );
     this._spidConfig = config;
     this.name = config.name || 'spid';
+    this._loadIDPS();
   }
 
   protected getSpidConfig(): SpidConfig {
     return this._spidConfig;
-  }
-
-  async init() {
-    await this._loadIDPSConfig();
   }
 
   authenticate(req: RequestWithUser, options: AuthenticateOptions): void {
@@ -102,16 +92,18 @@ export class SpidStrategy extends MultiSamlStrategy {
       .catch((err) => this.error(err));
   }
 
-  public getIDPSConfig() {
-    return this._spidIDPSConfig;
+  public getIDPS() {
+    return this.idps;
   }
 
-  private async _loadIDPSConfig() {
+  private _loadIDPS() {
     const config: SpidConfig = this.getSpidConfig();
-    const xml = await config.spid.getIDPRegistryMetadata();
-    const meta = new IDPMetadata(xml);
-    this._spidIDPSConfig = meta.getEntitiesConfig();
-    if (this._spidIDPSConfig.length === 0) {
+    const xml = config.spid.IDPRegistryMetadata;
+    this.idps = getIdentityProviders(
+      xml,
+      config.saml.authnRequestBinding === 'HTTP-POST',
+    );
+    if (this.idps.length === 0) {
       throw new Error('No identity provider found');
     }
   }
@@ -119,7 +111,7 @@ export class SpidStrategy extends MultiSamlStrategy {
   async _getSpidSamlOptions(req: Request): Promise<SamlConfig> {
     const config = this.getSpidConfig();
     const { saml, spid } = config;
-    const idps = this.getIDPSConfig();
+    const idps = this.idps;
     const { getIDPEntityIdFromRequest } = config.spid;
     const entityId = await getIDPEntityIdFromRequest(req);
     let idp = idps.find((x) => x.entityId === entityId);
@@ -159,11 +151,9 @@ export class SpidStrategy extends MultiSamlStrategy {
         config.spid.serviceProvider.publicCert,
         (err, xml) => {
           if (err) rej(err);
-          else
-            new SPMetadata(xml, config)
-              .build()
-              .then((result) => res(result))
-              .catch((err) => rej(err));
+          else {
+            res(new SPMetadata(xml, config).generate().xml);
+          }
         },
       );
     });

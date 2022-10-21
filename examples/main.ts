@@ -13,6 +13,7 @@ async function run() {
   const redis = new Redis('redis://redis');
   const idp = 'https://localhost:8443';
   const idpMetadataUrl = 'https://spid:8443/metadata.xml';
+  // const idpMetadata = (await fs.readFile('./var/idp-prod.xml')).toString();
   const idpMetadata = (await axios(idpMetadataUrl)).data;
   const sp = 'http://localhost:4000';
   const privateKey = (await fs.readFile('./var/keys/key.pem')).toString();
@@ -49,7 +50,7 @@ async function run() {
     },
     spid: {
       getIDPEntityIdFromRequest: (req) => idp,
-      getIDPRegistryMetadata: () => idpMetadata,
+      IDPRegistryMetadata: idpMetadata,
       serviceProvider: {
         type: 'public',
         entityId: sp,
@@ -83,7 +84,6 @@ async function run() {
     done(null, profile as any);
   };
   const strategy = new SpidStrategy(config, verify, verify);
-  await strategy.init();
   passport.use('spid', strategy);
   const passportOptions = {
     session: false,

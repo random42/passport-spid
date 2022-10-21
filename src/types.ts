@@ -1,6 +1,5 @@
 import { Request } from 'express';
 import { SamlConfig, Profile } from '@node-saml/passport-saml';
-import * as passport from 'passport';
 import { SPID_LEVELS, SPID_FORCED_SAML_CONFIG } from './const';
 
 export type SpidLevel = keyof typeof SPID_LEVELS;
@@ -141,7 +140,7 @@ export interface SpidConfig extends StrategyOptions {
   saml: SpidSamlConfig;
   spid: {
     serviceProvider: ServiceProviderConfig;
-    getIDPRegistryMetadata: () => string | Promise<string>;
+    IDPRegistryMetadata: string;
     getIDPEntityIdFromRequest: (req: Request) => string | Promise<string>;
   };
   cache: Cache;
