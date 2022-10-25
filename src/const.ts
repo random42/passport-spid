@@ -28,6 +28,8 @@ export const SPID_SAML_EXTENSION = 'https://spid.gov.it/saml-extensions';
 export const IDENTIFIER_FORMAT =
   'urn:oasis:names:tc:SAML:2.0:nameid-format:transient';
 export const ISSUER_FORMAT = 'urn:oasis:names:tc:SAML:2.0:nameid-format:entity';
+export const SUBJECT_CONFIRMATION_METHOD =
+  'urn:oasis:names:tc:SAML:2.0:cm:bearer';
 
 export const SPID_FORCED_SAML_CONFIG = {
   signMetadata: false,

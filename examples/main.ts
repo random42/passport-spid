@@ -39,7 +39,7 @@ async function run() {
   };
   const config: SpidConfig = {
     saml: {
-      attributeConsumingServiceIndex: '0', // index of 'acs' array
+      attributeConsumingServiceIndex: '1', // index of 'acs' array
       signatureAlgorithm: 'sha256',
       callbackUrl: `${sp}/login/cb`,
       logoutCallbackUrl: `${sp}/logout/cb`,
@@ -58,7 +58,7 @@ async function run() {
         acs: [
           {
             name: 'acs0',
-            attributes: ['spidCode'],
+            attributes: ['spidCode', 'email', 'fiscalNumber'],
           },
           {
             name: 'acs1',

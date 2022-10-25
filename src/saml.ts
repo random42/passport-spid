@@ -21,7 +21,7 @@ export class SpidSAML extends SAML {
       host,
     );
     const req = new SpidRequest(xml);
-    const id = req.getId();
+    const id = req.id;
     const final = req.generate(this.options).xml;
     const { cache } = this.spidConfig;
     await cache.set(id, final);

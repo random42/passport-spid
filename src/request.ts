@@ -5,11 +5,11 @@ import { sign } from './sign';
 import { SamlOptions } from '@node-saml/node-saml/lib';
 
 export class SpidRequest extends XML {
-  getId(): string {
+  get id(): string {
     return this.get('samlp:AuthnRequest.@.ID');
   }
 
-  getIssueInstant(): Date {
+  get issueInstant(): Date {
     return new Date(this.get('samlp:AuthnRequest.@.IssueInstant'));
   }
 

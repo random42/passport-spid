@@ -64,7 +64,7 @@ export class XML {
     this.xml = _xml;
   }
 
-  protected get(path: string) {
+  get(path: string) {
     return get(this._, path);
   }
 
