@@ -152,7 +152,7 @@ export class SpidStrategy extends MultiSamlStrategy {
         (err, xml) => {
           if (err) rej(err);
           else {
-            res(new SPMetadata(xml, config).generate().xml);
+            res(new SPMetadata(xml, config).generate());
           }
         },
       );

@@ -1,20 +1,28 @@
-import { XML } from './xml';
-import { ISSUER_FORMAT } from './const';
+import { parseDom, serialize, XML, XML_ } from './xml';
+import { ISSUER_FORMAT, NS } from './const';
 import { SamlOptions } from '@node-saml/node-saml/lib';
+import fs from 'fs-extra';
 
-export class SpidRequest extends XML {
+export class SpidRequest extends XML_ {
+  protected get request() {
+    return this.getElement('AuthnRequest', NS.SAML_PROTOCOL);
+  }
+
   get id(): string {
-    return this.get('samlp:AuthnRequest.@.ID');
+    return this.request.getAttribute('ID');
   }
 
   get issueInstant(): Date {
-    return new Date(this.get('samlp:AuthnRequest.@.IssueInstant'));
+    return new Date(this.request.getAttribute('IssueInstant'));
   }
 
   generate(options: SamlOptions) {
-    this.set('samlp:AuthnRequest.saml:Issuer.@.Format', ISSUER_FORMAT);
-    this.set('samlp:AuthnRequest.saml:Issuer.@.NameQualifier', options.issuer);
-    this.unset('samlp:AuthnRequest.samlp:NameIDPolicy.@.AllowCreate');
-    this.unset('samlp:AuthnRequest.Signature');
+    const issuer = this.getElement('Issuer');
+    const nameIdPolicy = this.getElement('NameIDPolicy');
+    issuer.setAttribute('Format', ISSUER_FORMAT);
+    issuer.setAttribute('NameQualifier', options.issuer);
+    nameIdPolicy.removeAttribute('AllowCreate');
+    const sig = this.getElement('Signature');
+    if (sig) this.dom.removeChild(this.getElement('Signature'));
   }
 }

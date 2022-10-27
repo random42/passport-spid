@@ -1,9 +1,9 @@
 import { ServiceProviderOrganization, SpidConfig } from './types';
 import * as XML from './xml';
-import { SPID_SAML_EXTENSION } from './const';
+import { NS } from './const';
 import { sign } from './sign';
 
-export class SPMetadata extends XML.XML {
+export class SPMetadata extends XML.XML_ {
   constructor(xml: string, private config: SpidConfig) {
     super(xml);
   }
@@ -12,34 +12,33 @@ export class SPMetadata extends XML.XML {
     const { spid, saml } = this.config;
     const { privateKey, signatureAlgorithm } = saml;
     const cert = spid.serviceProvider.publicCert;
-    this.load(
-      sign(this.xml(), {
-        signatureAlgorithm,
-        privateKey,
-        certificate: cert,
-        action: 'prepend',
-        nodeName: 'EntityDescriptor',
-      }),
-    );
-    return this;
+    return sign(this.xml(), {
+      signatureAlgorithm,
+      privateKey,
+      certificate: cert,
+      action: 'prepend',
+      nodeName: 'EntityDescriptor',
+    });
   }
 
   private getAttributeConsumingServices() {
     const { acs } = this.config.spid.serviceProvider;
-    return acs.map((s, i) => ({
-      '@': {
-        index: i,
-      },
-      'md:ServiceName': {
-        '#': s.name,
-        '@': { 'xml:lang': 'it' },
-      },
-      'md:RequestedAttribute': s.attributes.map((a) => ({
+    return {
+      AttributeConsumingService: acs.map((s, i) => ({
         '@': {
-          Name: a,
+          index: i,
         },
+        ServiceName: {
+          '#': s.name,
+          '@': { 'xml:lang': 'it' },
+        },
+        RequestedAttribute: s.attributes.map((a) => ({
+          '@': {
+            Name: a,
+          },
+        })),
       })),
-    }));
+    };
   }
 
   private getSpidInfo() {
@@ -64,31 +63,31 @@ export class SPMetadata extends XML.XML {
         })
         .filter((x) => x);
     const tree = {
-      'md:Organization': {
-        'md:OrganizationName': orgKey('name'),
-        'md:OrganizationDisplayName': orgKey('displayName'),
-        'md:OrganizationURL': orgKey('url'),
+      Organization: {
+        OrganizationName: orgKey('name'),
+        OrganizationDisplayName: orgKey('displayName'),
+        OrganizationURL: orgKey('url'),
       },
-      'md:ContactPerson': [
+      ContactPerson: [
         {
           '@': {
             contactType: 'other',
           },
-          'md:Extensions': {
+          Extensions: {
             'spid:VATNumber': cp.VATNumber,
             'spid:IPACode': cp.IPACode,
             'spid:FiscalCode': cp.fiscalCode,
             ...(isPublic ? { 'spid:Public': {} } : { 'spid:Private': {} }),
           },
-          'md:Company': org.it.name,
-          'md:EmailAddress': cp.email,
-          ...(cp.telephone ? { 'md:TelephoneNumber': cp.telephone } : null),
+          Company: org.it.name,
+          EmailAddress: cp.email,
+          ...(cp.telephone ? { TelephoneNumber: cp.telephone } : null),
         },
         bcp && {
           '@': {
             contactType: 'billing',
           },
-          'md:Extensions': {
+          Extensions: {
             '@': {
               'xmlns:fpa': 'https://spid.gov.it/invoicing-extensions',
             },
@@ -137,30 +136,23 @@ export class SPMetadata extends XML.XML {
                 }
               : null),
           },
-          ...(bcp.company ? { 'md:Company': bcp.company } : null),
-          'md:EmailAddress': bcp.email,
+          ...(bcp.company ? { Company: bcp.company } : null),
+          EmailAddress: bcp.email,
         },
       ].filter((x) => x),
     };
     return tree;
   }
 
-  private setNamespaces() {
-    this.renameNamespace('', 'md', 'EntityDescriptor');
-    this.set('md:EntityDescriptor.@.xmlns:spid', SPID_SAML_EXTENSION);
-  }
-
   generate() {
-    this.setNamespaces();
-    this.set(
-      'md:EntityDescriptor.md:SPSSODescriptor.md:AssertionConsumerService.@.index',
-      '0',
+    this.getElement('EntityDescriptor').setAttribute('xmlns:spid', NS.SPID);
+    this.getElement('AssertionConsumerService').setAttribute('index', '0');
+    this.getElement('SPSSODescriptor').appendChild(
+      XML.nodeFromObject(this.getAttributeConsumingServices()),
     );
-    this.set(
-      'md:EntityDescriptor.md:SPSSODescriptor.md:AttributeConsumingService',
-      this.getAttributeConsumingServices(),
+    this.getElement('EntityDescriptor').appendChild(
+      XML.nodeFromObject(this.getSpidInfo()),
     );
-    Object.assign(this.get('md:EntityDescriptor'), this.getSpidInfo());
     return this.sign();
   }
 }

@@ -1,6 +1,7 @@
 import get from 'lodash.get';
 import set from 'lodash.set';
 import unset from 'lodash.unset';
+import { DOMParser, XMLSerializer } from '@xmldom/xmldom';
 import {
   X2jOptionsOptional,
   XMLBuilder,
@@ -26,8 +27,16 @@ const OPTIONS: X2jOptionsOptional & XmlBuilderOptionsOptional = {
 const parser = new XMLParser(OPTIONS);
 const builder = new XMLBuilder(OPTIONS);
 
+export const parseDom = (xml: string) =>
+  new DOMParser().parseFromString(xml, 'text/xml');
+export const serialize = (node: Node) =>
+  new XMLSerializer().serializeToString(node);
+
 export const parse = parser.parse.bind(parser) as XMLParser['parse'];
 export const build = builder.build.bind(builder) as XMLBuilder['build'];
+
+export const nodeFromObject = (x) => parseDom(build(x));
+export const buildFromObject = build;
 
 const _rename = (obj, from: string, to: string) => {
   obj[to] = obj[from];
@@ -67,6 +76,29 @@ export const _find = (node, tag: string): any[] => {
   }
   return found;
 };
+
+export class XML_ {
+  protected dom: Document;
+  constructor(xml: string) {
+    this.load(xml);
+  }
+
+  public load(xml: string) {
+    this.dom = parseDom(xml);
+  }
+
+  protected getElement(tag, ns?: string): Element {
+    return this.getElements(tag, ns)[0];
+  }
+
+  protected getElements(tag, ns?: string): Element[] {
+    return Array.from(this.dom.getElementsByTagNameNS(ns ?? '*', tag));
+  }
+
+  xml() {
+    return serialize(this.dom);
+  }
+}
 
 export class XML {
   // parsed object

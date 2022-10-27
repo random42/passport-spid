@@ -31,7 +31,7 @@ export class SpidSAML extends SAML {
       // fs.writeJSONSync('./var/req.json', req.get(), { spaces: 2 });
     }
     xml = req.xml();
-    // fs.writeFileSync('./var/req.xml', xml);
+    fs.writeFileSync('./var/req.xml', xml);
     const { cache } = this.spidConfig;
     await cache.set(id, xml);
     const timeoutMs =

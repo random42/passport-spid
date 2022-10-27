@@ -1,35 +1,32 @@
 import { IDPConfig } from './types';
 import get from 'lodash.get';
-import { parse, XML } from './xml';
+import { parse, parseDom, XML } from './xml';
+import { DOMParser } from '@xmldom/xmldom';
+import { NS } from './const';
 
 export const getIdentityProviders = (
   xml: string,
   httpPost: boolean,
 ): IDPConfig[] => {
-  const x = parse(xml);
+  const dom = parseDom(xml);
+  const idps = Array.from(
+    dom.getElementsByTagNameNS(NS.SAML_METADATA, 'EntityDescriptor'),
+  );
   const binding =
     'urn:oasis:names:tc:SAML:2.0:bindings:' +
     (httpPost ? 'HTTP-POST' : 'HTTP-Redirect');
-  const idps = x['md:EntitiesDescriptor']
-    ? x['md:EntitiesDescriptor']?.['md:EntityDescriptor']
-    : [x['md:EntityDescriptor']];
-  return idps.map((idp = {}): IDPConfig => {
-    const findBinding = (s) => get(s, '@.Binding') === binding;
-    const login = get(idp, 'md:IDPSSODescriptor.md:SingleSignOnService').find(
-      findBinding,
-    );
-    const logout = get(idp, 'md:IDPSSODescriptor.md:SingleLogoutService').find(
-      findBinding,
-    );
-    let keys: any[] = get(idp, 'md:IDPSSODescriptor.md:KeyDescriptor');
-    keys = Array.isArray(keys) ? keys : [keys];
+
+  return idps.map((idp) => {
+    const getLocation = (tag: string) =>
+      Array.from(idp.getElementsByTagNameNS(NS.SAML_METADATA, tag))
+        .find((x) => x.getAttribute('Binding') === binding)
+        ?.getAttribute('Location');
     return {
-      entityId: get(idp, '@.entityID'),
-      cert: keys.map((k) =>
-        get(k, 'ds:KeyInfo.ds:X509Data.ds:X509Certificate'),
-      ),
-      entryPoint: get(login, '@.Location'),
-      logoutUrl: get(logout, '@.Location'),
+      entityId: idp.getAttribute('entityID'),
+      cert: idp.getElementsByTagNameNS(NS.SIG, 'X509Certificate').item(0)
+        ?.textContent,
+      entryPoint: getLocation('SingleSignOnService'),
+      logoutUrl: getLocation('SingleLogoutService'),
     };
   });
 };

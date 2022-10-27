@@ -4,17 +4,20 @@ import Redis from 'ioredis';
 import axios from 'axios';
 import passport from 'passport';
 import { SpidStrategy, SpidConfig, SamlSpidProfile } from '../src';
+import { sleep } from '../src/util';
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
 async function run() {
+  await sleep(2000);
   const app = express();
   // if (1) return;
   const redis = new Redis('redis://redis');
+  // const idp = 'https://localhost:8080';
   const idp = 'https://localhost:8443';
   const idpMetadataUrl = 'https://spid:8443/metadata.xml';
-  const idpMetadata = (await fs.readFile('./var/idp-test.xml')).toString();
-  // const idpMetadata = (await axios(idpMetadataUrl)).data;
+  const idpMetadata = (await axios(idpMetadataUrl)).data;
+  // const idpMetadata = (await fs.readFile('./var/idp-test.xml')).toString();
   const sp = 'http://localhost:4000';
   const privateKey = (await fs.readFile('./var/keys/key.pem')).toString();
   const spCert = (await fs.readFile('./var/keys/crt.pem')).toString();

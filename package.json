@@ -37,6 +37,7 @@
   "dependencies": {
     "@node-saml/node-saml": "github:node-saml/node-saml#e3577ccdcd6b4856f9e6a233f4720bdd109d7271",
     "@node-saml/passport-saml": "github:node-saml/passport-saml#b67c144fd2a31ad937c5169ab2619a73da4b216f",
+    "@xmldom/xmldom": "^0.8.3",
     "dayjs": "^1.11.5",
     "fast-xml-parser": "^4.0.8",
     "lodash.difference": "^4.5.0",

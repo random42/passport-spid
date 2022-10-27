@@ -23,8 +23,6 @@ export const SPID_IDP_IDENTIFIERS = {
   'https://spid.register.it': 'spiditalia',
 } as const;
 
-export const SPID_SAML_EXTENSION = 'https://spid.gov.it/saml-extensions';
-
 export const IDENTIFIER_FORMAT =
   'urn:oasis:names:tc:SAML:2.0:nameid-format:transient';
 export const ISSUER_FORMAT = 'urn:oasis:names:tc:SAML:2.0:nameid-format:entity';
@@ -43,3 +41,11 @@ export const SPID_FORCED_SAML_CONFIG = {
   cacheProvider: null,
   requestIdExpirationPeriodMs: 15 * 60 * 1000,
 } as const;
+
+export const NS = {
+  SAML_METADATA: 'urn:oasis:names:tc:SAML:2.0:metadata',
+  SAML_PROTOCOL: 'urn:oasis:names:tc:SAML:2.0:protocol',
+  SAML_ASSERTION: 'urn:oasis:names:tc:SAML:2.0:assertion',
+  SIG: 'http://www.w3.org/2000/09/xmldsig#',
+  SPID: 'https://spid.gov.it/saml-extensions',
+};
