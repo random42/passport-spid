@@ -6,13 +6,10 @@ import { SpidRequest } from './request';
 import {
   IDENTIFIER_FORMAT,
   ISSUER_FORMAT,
-  SPID_FORCED_SAML_CONFIG,
   SPID_LEVELS,
   SUBJECT_CONFIRMATION_METHOD,
 } from './const';
 import { SamlOptions } from '@node-saml/node-saml/lib';
-// TODO remove
-import fs from 'fs-extra';
 import { array } from './util';
 import get from 'lodash.get';
 import difference from 'lodash.difference';
@@ -96,9 +93,6 @@ export class SpidResponse extends XML.XML {
           })),
       },
     };
-    fs.writeJSONSync('var/res.json', data, {
-      spaces: 2,
-    });
     // ID
     assert(data.id, `Missing ID`);
     // Version

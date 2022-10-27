@@ -42,6 +42,4 @@ export const SPID_FORCED_SAML_CONFIG = {
   passive: false,
   cacheProvider: null,
   requestIdExpirationPeriodMs: 15 * 60 * 1000,
-  // TODO remove
-  acceptedClockSkewMs: -1,
 } as const;

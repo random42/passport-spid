@@ -1,6 +1,7 @@
 import { SAML, SamlConfig } from '@node-saml/node-saml';
+import { signAuthnRequestPost } from '@node-saml/node-saml/lib/saml-post-signing';
 import { SpidRequest } from './request';
-import fs from 'fs';
+import fs from 'fs-extra';
 import { SamlSpidProfile, SpidConfig } from './types';
 import { SpidResponse } from './response';
 
@@ -15,16 +16,24 @@ export class SpidSAML extends SAML {
     host: string,
   ): Promise<string> {
     // cannot use super because these are instance functions
-    const xml = await super.generateAuthorizeRequestAsync(
+    let xml = await super.generateAuthorizeRequestAsync(
       isPassive,
       isHttpPostBinding,
       host,
     );
     const req = new SpidRequest(xml);
     const id = req.id;
-    const final = req.generate(this.options).xml;
+    req.generate(this.options);
+    if (this.options.authnRequestBinding === 'HTTP-POST') {
+      // re-sign request
+      req.load(signAuthnRequestPost(req.xml(), this.options as any));
+      // req.renameNamespace('', 'ds', 'samlp:AuthnRequest.Signature');
+      // fs.writeJSONSync('./var/req.json', req.get(), { spaces: 2 });
+    }
+    xml = req.xml();
+    // fs.writeFileSync('./var/req.xml', xml);
     const { cache } = this.spidConfig;
-    await cache.set(id, final);
+    await cache.set(id, xml);
     const timeoutMs =
       this.options.requestIdExpirationPeriodMs ?? 1000 * 60 * 60 * 15;
     if (cache.expire) {
@@ -34,7 +43,7 @@ export class SpidSAML extends SAML {
         cache.delete(id);
       }, timeoutMs);
     }
-    return final;
+    return xml;
   }
 
   protected async processValidlySignedAssertionAsync(
@@ -52,18 +61,13 @@ export class SpidSAML extends SAML {
     }
     const req = new SpidRequest(reqXml);
     const res = new SpidResponse(samlResponseXml);
-    // TODO use back
-    // await cache.delete(inResponseTo);
+    await cache.delete(inResponseTo);
     const { profile, loggedOut } =
       await super.processValidlySignedAssertionAsync(
         xml,
         samlResponseXml,
         inResponseTo,
       );
-    // TODO remove
-    // fs.writeFileSync('./var/req.xml', reqXml);
-    fs.writeFileSync('./var/res.xml', samlResponseXml);
-
     res.validate(req, this.spidConfig, this.options);
     const p = profile as SamlSpidProfile;
     p.getSamlRequestXml = () => reqXml;

@@ -1,6 +1,4 @@
-import { SamlOptions } from '@node-saml/node-saml/lib';
 import { SignedXml } from 'xml-crypto';
-import { SpidConfig } from './types';
 
 export const sign = (
   xml: string,

@@ -7,6 +7,7 @@ import {
   XmlBuilderOptionsOptional,
   XMLParser,
 } from 'fast-xml-parser';
+import { array } from './util';
 
 const TEXT = '#';
 const ATTR = '@';
@@ -38,6 +39,8 @@ const _getTagName = (k: string) =>
   k.includes(':') ? k.slice(k.indexOf(':') + 1) : k;
 const isNs = (tag: string, ns: string) =>
   ns ? tag.startsWith(`${ns}:`) : !tag.includes(':');
+const _children = (node) =>
+  Object.keys(node).filter((k) => ![TEXT, ATTR, '?xml'].includes(k));
 
 const _renameNamespace = (node, from: string, to: string) => {
   if (Array.isArray(node)) {
@@ -46,9 +49,7 @@ const _renameNamespace = (node, from: string, to: string) => {
     return;
   }
   const prefix = _nsPrefix(to);
-  for (const k of Object.keys(node).filter(
-    (k) => ![TEXT, ATTR, '?xml'].includes(k),
-  )) {
+  for (const k of _children(node)) {
     _renameNamespace(node[k], from, to);
     if (isNs(k, from)) {
       _rename(node, k, prefix + _getTagName(k));
@@ -56,16 +57,28 @@ const _renameNamespace = (node, from: string, to: string) => {
   }
 };
 
+export const _find = (node, tag: string): any[] => {
+  const found = [];
+  for (const k of _children(node)) {
+    const t = _getTagName(k);
+    if (t === tag) {
+      found.push(...array(node[k]));
+    }
+  }
+  return found;
+};
+
 export class XML {
   // parsed object
   protected _: any;
 
-  constructor(protected _xml: string) {
-    this.xml = _xml;
+  constructor(xml: string) {
+    this.load(xml);
   }
 
-  get(path: string) {
-    return get(this._, path);
+  get(path?: string) {
+    if (!path) return this._;
+    else return get(this._, path);
   }
 
   protected set(path: string, value) {
@@ -76,13 +89,16 @@ export class XML {
     unset(this._, path);
   }
 
-  get xml() {
-    return this._xml;
+  xml() {
+    return build(this._);
   }
 
-  set xml(xml: string) {
-    this._xml = xml;
+  load(xml: string) {
     this._ = parse(xml);
+  }
+
+  find(tag: string) {
+    return _find(this._, tag);
   }
 
   renameNamespace(from: string, to: string, root: string) {
@@ -92,10 +108,5 @@ export class XML {
     const newAttrKey = `xmlns${to ? `:${to}` : ''}`;
     _rename(node[ATTR], oldAttrKey, newAttrKey);
     _renameNamespace(this._, from, to);
-  }
-
-  public build() {
-    this._xml = build(this._);
-    return this;
   }
 }

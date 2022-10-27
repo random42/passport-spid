@@ -13,8 +13,8 @@ async function run() {
   const redis = new Redis('redis://redis');
   const idp = 'https://localhost:8443';
   const idpMetadataUrl = 'https://spid:8443/metadata.xml';
-  // const idpMetadata = (await fs.readFile('./var/idp-prod.xml')).toString();
-  const idpMetadata = (await axios(idpMetadataUrl)).data;
+  const idpMetadata = (await fs.readFile('./var/idp-test.xml')).toString();
+  // const idpMetadata = (await axios(idpMetadataUrl)).data;
   const sp = 'http://localhost:4000';
   const privateKey = (await fs.readFile('./var/keys/key.pem')).toString();
   const spCert = (await fs.readFile('./var/keys/crt.pem')).toString();
@@ -39,6 +39,7 @@ async function run() {
   };
   const config: SpidConfig = {
     saml: {
+      // authnRequestBinding: 'HTTP-POST',
       attributeConsumingServiceIndex: '1', // index of 'acs' array
       signatureAlgorithm: 'sha256',
       callbackUrl: `${sp}/login/cb`,
@@ -84,6 +85,7 @@ async function run() {
     done(null, profile as any);
   };
   const strategy = new SpidStrategy(config, verify, verify);
+  const metadata = await strategy.generateSpidServiceProviderMetadata();
   passport.use('spid', strategy);
   const passportOptions = {
     session: false,
@@ -104,7 +106,6 @@ async function run() {
   app.get('/', (req, res) => res.sendStatus(200));
   app.get('/metadata', async (req, res) => {
     // you should cache this
-    const metadata = await strategy.generateSpidServiceProviderMetadata();
     res.contentType('text/xml');
     res.send(metadata);
   });

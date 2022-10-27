@@ -12,13 +12,16 @@ export class SPMetadata extends XML.XML {
     const { spid, saml } = this.config;
     const { privateKey, signatureAlgorithm } = saml;
     const cert = spid.serviceProvider.publicCert;
-    this.xml = sign(this.xml, {
-      signatureAlgorithm,
-      privateKey,
-      certificate: cert,
-      action: 'prepend',
-      nodeName: 'EntityDescriptor',
-    });
+    this.load(
+      sign(this.xml(), {
+        signatureAlgorithm,
+        privateKey,
+        certificate: cert,
+        action: 'prepend',
+        nodeName: 'EntityDescriptor',
+      }),
+    );
+    return this;
   }
 
   private getAttributeConsumingServices() {
@@ -158,7 +161,6 @@ export class SPMetadata extends XML.XML {
       this.getAttributeConsumingServices(),
     );
     Object.assign(this.get('md:EntityDescriptor'), this.getSpidInfo());
-    this.build().sign();
-    return this;
+    return this.sign();
   }
 }

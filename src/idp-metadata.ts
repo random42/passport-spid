@@ -1,9 +1,8 @@
-import fs from 'fs';
 import { IDPConfig } from './types';
 import get from 'lodash.get';
-import { parse } from './xml';
+import { parse, XML } from './xml';
 
-export const getIdentityProviders = (
+export const _getIdentityProviders = (
   xml: string,
   httpPost: boolean,
 ): IDPConfig[] => {
