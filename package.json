@@ -35,8 +35,8 @@
     "test": "jest"
   },
   "dependencies": {
-    "@node-saml/node-saml": "github:node-saml/node-saml#8b7b80780414defa6f529a21a286b57218222c1a",
-    "@node-saml/passport-saml": "github:node-saml/passport-saml#d74aaa644b7b71f06a0b50cc675157d028151bf2",
+    "@node-saml/node-saml": "github:node-saml/node-saml#e3577ccdcd6b4856f9e6a233f4720bdd109d7271",
+    "@node-saml/passport-saml": "github:node-saml/passport-saml#b67c144fd2a31ad937c5169ab2619a73da4b216f",
     "dayjs": "^1.11.5",
     "fast-xml-parser": "^4.0.8",
     "lodash.difference": "^4.5.0",
