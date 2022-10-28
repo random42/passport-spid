@@ -1,9 +1,8 @@
-import { parseDom, serialize, XML, XML_ } from './xml';
+import { XML } from './xml';
 import { ISSUER_FORMAT, NS } from './const';
 import { SamlOptions } from '@node-saml/node-saml/lib';
-import fs from 'fs-extra';
 
-export class SpidRequest extends XML_ {
+export class SpidRequest extends XML {
   protected get request() {
     return this.getElement('AuthnRequest', NS.SAML_PROTOCOL);
   }
@@ -24,5 +23,6 @@ export class SpidRequest extends XML_ {
     nameIdPolicy.removeAttribute('AllowCreate');
     const sig = this.getElement('Signature');
     if (sig) this.dom.removeChild(this.getElement('Signature'));
+    return this;
   }
 }

@@ -1,7 +1,5 @@
 import { IDPConfig } from './types';
-import get from 'lodash.get';
-import { parse, parseDom, XML } from './xml';
-import { DOMParser } from '@xmldom/xmldom';
+import { parseDom } from './xml';
 import { NS } from './const';
 
 export const getIdentityProviders = (

@@ -3,7 +3,7 @@ import {
   MultiSamlStrategy,
   SamlConfig,
 } from '@node-saml/passport-saml';
-import { Request } from 'express';
+import type { Request } from 'express';
 import { callbackify } from 'util';
 import { getIdentityProviders } from './idp-metadata';
 import { SPMetadata } from './sp-metadata';

@@ -1,6 +1,7 @@
 import { SAML, SamlConfig } from '@node-saml/node-saml';
 import { signAuthnRequestPost } from '@node-saml/node-saml/lib/saml-post-signing';
 import { SpidRequest } from './request';
+// TODO
 import fs from 'fs-extra';
 import { SamlSpidProfile, SpidConfig } from './types';
 import { SpidResponse } from './response';
@@ -23,14 +24,13 @@ export class SpidSAML extends SAML {
     );
     const req = new SpidRequest(xml);
     const id = req.id;
-    req.generate(this.options);
+
+    xml = req.generate(this.options).xml();
     if (this.options.authnRequestBinding === 'HTTP-POST') {
       // re-sign request
-      req.load(signAuthnRequestPost(req.xml(), this.options as any));
-      // req.renameNamespace('', 'ds', 'samlp:AuthnRequest.Signature');
+      xml = signAuthnRequestPost(xml, this.options as any);
       // fs.writeJSONSync('./var/req.json', req.get(), { spaces: 2 });
     }
-    xml = req.xml();
     fs.writeFileSync('./var/req.xml', xml);
     const { cache } = this.spidConfig;
     await cache.set(id, xml);
@@ -51,6 +51,7 @@ export class SpidSAML extends SAML {
     samlResponseXml: string,
     inResponseTo: string,
   ): Promise<{ profile: SamlSpidProfile; loggedOut: boolean }> {
+    fs.writeFileSync('./var/res.xml', samlResponseXml);
     if (!inResponseTo) {
       throw new Error(`Missing InResponseTo`);
     }

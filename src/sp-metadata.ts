@@ -3,7 +3,7 @@ import * as XML from './xml';
 import { NS } from './const';
 import { sign } from './sign';
 
-export class SPMetadata extends XML.XML_ {
+export class SPMetadata extends XML.XML {
   constructor(xml: string, private config: SpidConfig) {
     super(xml);
   }

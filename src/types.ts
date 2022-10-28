@@ -1,4 +1,4 @@
-import { Request } from 'express';
+import type { Request } from 'express';
 import { SamlConfig, Profile } from '@node-saml/passport-saml';
 import { SPID_LEVELS, SPID_FORCED_SAML_CONFIG } from './const';
 

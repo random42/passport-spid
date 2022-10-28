@@ -1,10 +1,10 @@
 import express from 'express';
-import { promises as fs } from 'fs';
+import fs from 'fs-extra';
 import Redis from 'ioredis';
 import axios from 'axios';
 import passport from 'passport';
 import { SpidStrategy, SpidConfig, SamlSpidProfile } from '../src';
-import { sleep } from '../src/util';
+export const sleep = (ms) => new Promise((res) => setTimeout(res, ms));
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
@@ -42,8 +42,8 @@ async function run() {
   };
   const config: SpidConfig = {
     saml: {
-      // authnRequestBinding: 'HTTP-POST',
-      attributeConsumingServiceIndex: '1', // index of 'acs' array
+      authnRequestBinding: 'HTTP-POST',
+      attributeConsumingServiceIndex: '0', // index of 'acs' array
       signatureAlgorithm: 'sha256',
       callbackUrl: `${sp}/login/cb`,
       logoutCallbackUrl: `${sp}/logout/cb`,
