@@ -155,6 +155,7 @@ scripts/keygen.sh var/keys \
   --sector public
 # start docker compose
 docker-compose up
+# open localhost:4000/login
 ```
 
 [downloads-img]:https://img.shields.io/npm/dt/passport-spid
