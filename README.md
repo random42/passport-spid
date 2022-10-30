@@ -134,6 +134,29 @@ async function run() {
 }
 ```
 
+## Development setup
+
+Prerequisites:
+
+- Docker and docker-compose
+
+```sh
+# make scripts executable
+chmod -R u+x scripts
+# generate key and certificate
+scripts/keygen.sh var/keys \
+  --key-size 3072 \
+  --common-name "example" \
+  --days 365 \
+  --entity-id http://localhost:4000 \
+  --locality-name Roma \
+  --org-id "PA:IT-c_h501" \
+  --org-name "example" \
+  --sector public
+# start docker compose
+docker-compose up
+```
+
 [downloads-img]:https://img.shields.io/npm/dt/passport-spid
 [downloads-url]:https://www.npmtrends.com/passport-spid
 [npm-img]:https://img.shields.io/npm/v/passport-spid

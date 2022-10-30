@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 set -e
-docker run -ti --rm \
+docker run --user 0 -ti --rm \
 -v "$(pwd)/${1}:/certs:rw" \
 italia/spid-compliant-certificates generator ${@:2} #\
 # --key-size 3072 \
