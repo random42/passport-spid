@@ -76,7 +76,7 @@ export interface AttributeConsumingService {
 export interface CommonServiceProviderConfig {
   type: 'public' | 'private';
   entityId: string;
-  publicCert: string;
+  certificate: string;
   acs: AttributeConsumingService[];
   organization: {
     it: ServiceProviderOrganization;

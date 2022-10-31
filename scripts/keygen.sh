@@ -1,9 +1,8 @@
-#!/usr/bin/env bash
-
 set -e
+
 docker run --user 0 -ti --rm \
 -v "$(pwd)/${1}:/certs:rw" \
-italia/spid-compliant-certificates generator ${@:2} #\
+"italia/spid-compliant-certificates:latest" generator ${@:2} #\
 # --key-size 3072 \
 # --common-name "example" \
 # --days 365 \

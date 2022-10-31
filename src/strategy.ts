@@ -3,11 +3,17 @@ import {
   MultiSamlStrategy,
   SamlConfig,
 } from '@node-saml/passport-saml';
+import { generateServiceProviderMetadata } from '@node-saml/node-saml/lib/metadata';
 import type { Request } from 'express';
 import { callbackify } from 'util';
 import { getIdentityProviders } from './idp-metadata';
 import { SPMetadata } from './sp-metadata';
-import { IDPConfig, SamlSpidProfile, SpidConfig } from './types';
+import {
+  IDPConfig,
+  SamlSpidProfile,
+  SpidConfig,
+  SpidSamlConfig,
+} from './types';
 import {
   SPID_LEVELS,
   SPID_FORCED_SAML_CONFIG,
@@ -65,8 +71,8 @@ export class SpidStrategy extends MultiSamlStrategy {
       signonVerify,
       logoutVerify,
     );
-    config.spid.serviceProvider.publicCert = cleanPem(
-      config.spid.serviceProvider.publicCert,
+    config.spid.serviceProvider.certificate = cleanPem(
+      config.spid.serviceProvider.certificate,
     );
     this._spidConfig = config;
     this.name = config.name || 'spid';
@@ -145,16 +151,15 @@ export class SpidStrategy extends MultiSamlStrategy {
 
   async generateSpidServiceProviderMetadata() {
     const config = this.getSpidConfig();
+    const { certificate } = config.spid.serviceProvider;
     return new Promise((res, rej) => {
       super.generateServiceProviderMetadata(
         {} as any,
         null,
-        config.spid.serviceProvider.publicCert,
+        certificate,
         (err, xml) => {
           if (err) rej(err);
-          else {
-            res(new SPMetadata(xml, config).generate());
-          }
+          else res(new SPMetadata(xml, config).generate());
         },
       );
     });

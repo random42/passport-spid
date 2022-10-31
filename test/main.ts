@@ -9,8 +9,11 @@ import {
   SpidSamlConfig,
   DigestAlgorithm,
 } from '../src';
+import dotenv from 'dotenv';
 
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+dotenv.config({ path: process.argv[2] });
+
+const sleep = (ms) => new Promise((res) => setTimeout(res, ms));
 
 const {
   IDP,
@@ -47,7 +50,7 @@ async function run() {
       serviceProvider: {
         type: 'public',
         entityId: SP,
-        publicCert: spCert,
+        certificate: spCert,
         acs: [
           {
             name: 'acs0',

@@ -71,7 +71,7 @@ async function run() {
       serviceProvider: {
         type: 'public',
         entityId: sp,
-        publicCert: spCert,
+        certificate: spCert,
         acs: [
           {
             name: 'acs0',

@@ -10,7 +10,6 @@ export const sign = (
     action?: 'prepend' | 'append';
   },
 ) => {
-  // const cert = spid.serviceProvider.publicCert;
   const { privateKey, signatureAlgorithm, nodeName, certificate, action } =
     options;
   const sig = new SignedXml();

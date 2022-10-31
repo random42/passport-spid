@@ -11,7 +11,7 @@ export class SPMetadata extends XML.XML {
   private sign() {
     const { spid, saml } = this.config;
     const { privateKey, signatureAlgorithm } = saml;
-    const cert = spid.serviceProvider.publicCert;
+    const cert = spid.serviceProvider.certificate;
     return sign(this.xml(), {
       signatureAlgorithm,
       privateKey,
@@ -147,12 +147,10 @@ export class SPMetadata extends XML.XML {
   generate() {
     this.getElement('EntityDescriptor').setAttribute('xmlns:spid', NS.SPID);
     this.getElement('AssertionConsumerService').setAttribute('index', '0');
-    this.getElement('SPSSODescriptor').appendChild(
-      XML.nodeFromObject(this.getAttributeConsumingServices()),
-    );
-    this.getElement('EntityDescriptor').appendChild(
-      XML.nodeFromObject(this.getSpidInfo()),
-    );
+    const acs = XML.nodesFromObject(this.getAttributeConsumingServices());
+    const spidInfo = XML.nodesFromObject(this.getSpidInfo());
+    acs.forEach((x) => this.getElement('SPSSODescriptor').appendChild(x));
+    spidInfo.forEach((x) => this.getElement('EntityDescriptor').appendChild(x));
     return this.sign();
   }
 }

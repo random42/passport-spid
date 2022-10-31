@@ -24,15 +24,31 @@ const parser = new XMLParser(OPTIONS);
 const builder = new XMLBuilder(OPTIONS);
 
 export const parseDom = (xml: string) =>
-  new DOMParser().parseFromString(xml, 'text/xml');
+  new DOMParser({
+    errorHandler: {
+      error: (e) => {
+        throw e;
+      },
+      fatalError: (e) => {
+        throw e;
+      },
+      // warning: (e) => {
+      //   throw e;
+      // },
+    },
+  }).parseFromString(xml);
 export const serialize = (node: Node) =>
   new XMLSerializer().serializeToString(node);
 
 export const parse = parser.parse.bind(parser) as XMLParser['parse'];
 export const build = builder.build.bind(builder) as XMLBuilder['build'];
 
-export const nodeFromObject = (x) => parseDom(build(x));
-export const buildFromObject = build;
+// since you cannot put raw xml into dom (like innerHTML) this is what I gotta do...
+export const nodesFromObject = (x) => {
+  const xml = `<root>${build(x)}</root>`;
+  const dom = parseDom(xml);
+  return Array.from(dom.firstChild.childNodes);
+};
 
 export class XML {
   protected dom: Document;
