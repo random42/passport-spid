@@ -1,4 +1,7 @@
-import { ValidateInResponseTo } from '@node-saml/node-saml/lib/types';
+import {
+  SamlConfig,
+  ValidateInResponseTo,
+} from '@node-saml/node-saml/lib/types';
 
 export const SPID_LEVELS = {
   SpidL1: 'https://www.spid.gov.it/SpidL1',
@@ -34,12 +37,30 @@ export const SPID_FORCED_SAML_CONFIG = {
   digestAlgorithm: 'sha512',
   allowCreate: false,
   wantAssertionsSigned: true,
+  wantAuthnResponseSigned: true,
   disableRequestedAuthnContext: false,
   validateInResponseTo: ValidateInResponseTo.never,
   identifierFormat: IDENTIFIER_FORMAT,
   passive: false,
-  cacheProvider: null,
+  cacheProvider: undefined,
   requestIdExpirationPeriodMs: 15 * 60 * 1000,
+  xmlSignatureTransforms: [
+    'http://www.w3.org/2000/09/xmldsig#enveloped-signature',
+    'http://www.w3.org/2001/10/xml-exc-c14n#',
+  ] as string[],
+  acceptedClockSkewMs: 0,
+  maxAssertionAgeMs: undefined,
+  providerName: undefined,
+  disableRequestAcsUrl: false,
+  scoping: undefined,
+  metadataContactPerson: undefined,
+  metadataOrganization: undefined,
+  spNameQualifier: undefined,
+  samlAuthnRequestExtensions: undefined,
+  samlLogoutRequestExtensions: undefined,
+  host: undefined,
+  path: undefined,
+  protocol: undefined,
 } as const;
 
 export const NS = {

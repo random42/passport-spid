@@ -107,6 +107,7 @@ export type ServiceProviderConfig =
   | PublicServiceProviderConfig;
 
 export type SignatureAlgorithm = 'sha256' | 'sha512';
+export type DigestAlgorithm = 'sha256' | 'sha512';
 
 export type ForcedSamlConfig = keyof typeof SPID_FORCED_SAML_CONFIG;
 export type DynamicSamlConfig =
@@ -114,6 +115,9 @@ export type DynamicSamlConfig =
   | 'entryPoint'
   | 'logoutUrl'
   | 'issuer'
+  | 'idpIssuer'
+  // | 'audience'
+  | 'forceAuthn'
   | 'skipRequestCompression';
 export type OmitSamlConfig = ForcedSamlConfig | DynamicSamlConfig;
 
@@ -123,10 +127,13 @@ export interface StrategyOptions {
 }
 
 export interface SpidSamlConfig extends Omit<SamlConfig, OmitSamlConfig> {
+  callbackUrl: string;
   privateKey: string | Buffer;
+  digestAlgorithm: DigestAlgorithm;
   authnContext: SpidLevel[];
   signatureAlgorithm: SignatureAlgorithm;
   logoutCallbackUrl: string;
+  authnRequestBinding: 'HTTP-Redirect' | 'HTTP-POST';
 }
 
 export interface Cache {

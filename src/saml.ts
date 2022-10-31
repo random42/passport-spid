@@ -1,8 +1,6 @@
 import { SAML, SamlConfig } from '@node-saml/node-saml';
 import { signAuthnRequestPost } from '@node-saml/node-saml/lib/saml-post-signing';
 import { SpidRequest } from './request';
-// TODO
-import fs from 'fs-extra';
 import { SamlSpidProfile, SpidConfig } from './types';
 import { SpidResponse } from './response';
 
@@ -29,9 +27,7 @@ export class SpidSAML extends SAML {
     if (this.options.authnRequestBinding === 'HTTP-POST') {
       // re-sign request
       xml = signAuthnRequestPost(xml, this.options as any);
-      // fs.writeJSONSync('./var/req.json', req.get(), { spaces: 2 });
     }
-    fs.writeFileSync('./var/req.xml', xml);
     const { cache } = this.spidConfig;
     await cache.set(id, xml);
     const timeoutMs =
@@ -51,7 +47,6 @@ export class SpidSAML extends SAML {
     samlResponseXml: string,
     inResponseTo: string,
   ): Promise<{ profile: SamlSpidProfile; loggedOut: boolean }> {
-    fs.writeFileSync('./var/res.xml', samlResponseXml);
     if (!inResponseTo) {
       throw new Error(`Missing InResponseTo`);
     }

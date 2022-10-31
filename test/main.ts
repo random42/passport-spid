@@ -1,61 +1,52 @@
 import express from 'express';
 import fs from 'fs-extra';
-import Redis from 'ioredis';
-import axios from 'axios';
 import passport from 'passport';
-import { SpidStrategy, SpidConfig, SamlSpidProfile } from '../src';
-export const sleep = (ms) => new Promise((res) => setTimeout(res, ms));
+import {
+  SpidStrategy,
+  SpidConfig,
+  SamlSpidProfile,
+  SignatureAlgorithm,
+  SpidSamlConfig,
+  DigestAlgorithm,
+} from '../src';
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
+const {
+  IDP,
+  SP,
+  IDP_METADATA_FILE,
+  PRIVATE_KEY_FILE,
+  CERTIFICATE_FILE,
+  BINDING,
+  SIG_ALG,
+} = process.env;
+
 async function run() {
   const app = express();
-  const redis = new Redis('redis://redis');
-  // const idp = 'https://localhost:8080';
-  const idp = 'https://localhost:8443';
-  const idpMetadataUrl = 'https://spid:8443/metadata.xml';
-  const idpMetadata = (await axios(idpMetadataUrl)).data;
-  // const idpMetadata = (await fs.readFile('./var/idp-test.xml')).toString();
-  const sp = 'http://localhost:4000';
-  const privateKey = (await fs.readFile('./var/keys/key.pem')).toString();
-  const spCert = (await fs.readFile('./var/keys/crt.pem')).toString();
+  const idpMetadata = (await fs.readFile(IDP_METADATA_FILE)).toString();
+  const privateKey = (await fs.readFile(PRIVATE_KEY_FILE)).toString();
+  const spCert = (await fs.readFile(CERTIFICATE_FILE)).toString();
   const email = 'asd@example.com';
-  // you can use a normal Map (not recommended)
-  // const cache = new Map();
-  const cachePrefix = 'spid_request_';
-  const cache: SpidConfig['cache'] = {
-    get(key: string) {
-      return redis.get(cachePrefix + key);
-    },
-    set(key: string, value: string) {
-      return redis.set(cachePrefix + key, value);
-    },
-    delete(key: string) {
-      return redis.del(cachePrefix + key);
-    },
-    expire(key: string, ms: number) {
-      return redis.pexpire(cachePrefix + key, ms);
-    },
-  };
   const config: SpidConfig = {
     saml: {
-      authnRequestBinding: 'HTTP-POST',
+      authnRequestBinding: BINDING as SpidSamlConfig['authnRequestBinding'],
       attributeConsumingServiceIndex: '0', // index of 'acs' array
-      signatureAlgorithm: 'sha256',
-      digestAlgorithm: 'sha256',
-      callbackUrl: `${sp}/login/cb`,
-      logoutCallbackUrl: `${sp}/logout/cb`,
+      signatureAlgorithm: SIG_ALG as SignatureAlgorithm,
+      digestAlgorithm: SIG_ALG as DigestAlgorithm,
+      callbackUrl: `${SP}/login/cb`,
+      logoutCallbackUrl: `${SP}/logout/cb`,
       authnContext: ['SpidL1'],
       racComparison: 'minimum',
       privateKey,
-      audience: sp,
+      audience: SP,
     },
     spid: {
-      getIDPEntityIdFromRequest: (req) => idp,
+      getIDPEntityIdFromRequest: () => IDP,
       IDPRegistryMetadata: idpMetadata,
       serviceProvider: {
         type: 'public',
-        entityId: sp,
+        entityId: SP,
         publicCert: spCert,
         acs: [
           {
@@ -71,7 +62,7 @@ async function run() {
           it: {
             name: 'example',
             displayName: 'example',
-            url: sp,
+            url: SP,
           },
         },
         contactPerson: {
@@ -80,7 +71,7 @@ async function run() {
         },
       },
     },
-    cache,
+    cache: new Map(),
   };
   const verify = (profile, done) => {
     done(null, profile as any);
@@ -128,8 +119,8 @@ async function run() {
     res.status(500).send(err?.message);
   });
   app.listen(4000, () => {
-    console.log(sp);
-    console.log(idp);
+    console.log(SP);
+    console.log(IDP);
     console.log('http://server:4000/');
   });
 }
