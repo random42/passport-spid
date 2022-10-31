@@ -137,6 +137,7 @@ export class SpidStrategy extends MultiSamlStrategy {
         entryPoint: idp.entryPoint,
         logoutUrl: idp.logoutUrl,
         cert: idp.cert,
+        skipRequestCompression: saml.authnRequestBinding === 'HTTP-POST',
       },
       SPID_FORCED_SAML_CONFIG,
     );

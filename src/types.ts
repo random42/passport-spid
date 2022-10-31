@@ -109,7 +109,12 @@ export type ServiceProviderConfig =
 export type SignatureAlgorithm = 'sha256' | 'sha512';
 
 export type ForcedSamlConfig = keyof typeof SPID_FORCED_SAML_CONFIG;
-export type DynamicSamlConfig = 'cert' | 'entryPoint' | 'logoutUrl' | 'issuer';
+export type DynamicSamlConfig =
+  | 'cert'
+  | 'entryPoint'
+  | 'logoutUrl'
+  | 'issuer'
+  | 'skipRequestCompression';
 export type OmitSamlConfig = ForcedSamlConfig | DynamicSamlConfig;
 
 export interface StrategyOptions {
