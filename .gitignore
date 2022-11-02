@@ -1,6 +1,7 @@
 var/
 dist/
 node_modules/
+config/
 
 .history
 

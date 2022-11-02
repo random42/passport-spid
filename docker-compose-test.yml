@@ -1,5 +1,14 @@
 version: "3.9"
 services:
+  idp:
+    image: "ghcr.io/italia/spid-sp-test:latest"
+    entrypoint:
+      - sh
+      - -c
+    command:
+      - spid_sp_test --idp-metadata > idp.xml
+    volumes:
+      - config:/spid:rw
   keygen:
     image: italia/spid-compliant-certificates:latest
     command: "generator 
@@ -14,10 +23,6 @@ services:
       "
     volumes:
       - config:/certs:rw
-  spid:
-    image: "italia/spid-saml-check:latest"
-    ports:
-      - "8443:8443"
   web:
     build: .
     command: "npm run dev" 
@@ -28,17 +33,17 @@ services:
       retries: 2
       start_period: 3s
     depends_on:
-      spid:
-        condition: service_healthy
       keygen:
+        condition: service_completed_successfully
+      idp:
         condition: service_completed_successfully
     volumes:
       - config:/app/config:ro
     environment:
       NODE_TLS_REJECT_UNAUTHORIZED: 0
-      IDP: "https://localhost:8443"
-      SP: "http://localhost:4000"
-      IDP_METADATA_URL: "https://spid:8443/metadata.xml"
+      IDP: "https://localhost:8080"
+      SP: "http://web:4000"
+      IDP_METADATA_FILE: "config/idp.xml"
       PRIVATE_KEY_FILE: "config/key.pem"
       CERTIFICATE_FILE: "config/crt.pem"
       BINDING: HTTP-Redirect
@@ -46,5 +51,18 @@ services:
     ports:
       - 4000:4000
       - 9229:9229
+  test:
+    image: "ghcr.io/italia/spid-sp-test:latest"
+    command: "-pr spid-sp-public
+      --metadata-url http://web:4000/metadata \
+      --authn-url http://web:4000/login \
+      --request-method GET \
+      --extra \
+      --test-response \
+      -d WARNING
+      "
+    depends_on:
+      web:
+        condition: service_healthy
 volumes:
   config:

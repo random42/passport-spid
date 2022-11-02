@@ -26,7 +26,7 @@
     "dist/src/**"
   ],
   "scripts": {
-    "dev": "ts-node-dev --poll --respawn --inspect=0.0.0.0:9229 -- test/main.ts test/config/.env",
+    "dev": "ts-node-dev --respawn --inspect=0.0.0.0:9229 -- test/main.ts",
     "prebuild": "rimraf dist",
     "build": "tsc",
     "prepare": "run-s build",

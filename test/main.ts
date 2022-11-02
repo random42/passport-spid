@@ -10,6 +10,7 @@ import {
   DigestAlgorithm,
 } from '../src';
 import dotenv from 'dotenv';
+import axios from 'axios';
 
 dotenv.config({ path: process.argv[2] });
 
@@ -19,6 +20,7 @@ const {
   IDP,
   SP,
   IDP_METADATA_FILE,
+  IDP_METADATA_URL,
   PRIVATE_KEY_FILE,
   CERTIFICATE_FILE,
   BINDING,
@@ -27,7 +29,12 @@ const {
 
 async function run() {
   const app = express();
-  const idpMetadata = (await fs.readFile(IDP_METADATA_FILE)).toString();
+  let idpMetadata;
+  if (IDP_METADATA_FILE) {
+    idpMetadata = (await fs.readFile(IDP_METADATA_FILE)).toString();
+  } else if (IDP_METADATA_URL) {
+    idpMetadata = (await axios(IDP_METADATA_URL)).data;
+  }
   const privateKey = (await fs.readFile(PRIVATE_KEY_FILE)).toString();
   const spCert = (await fs.readFile(CERTIFICATE_FILE)).toString();
   const email = 'asd@example.com';
@@ -124,7 +131,6 @@ async function run() {
   app.listen(4000, () => {
     console.log(SP);
     console.log(IDP);
-    console.log('http://server:4000/');
   });
 }
 
