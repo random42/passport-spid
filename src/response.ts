@@ -12,21 +12,13 @@ import {
 } from './const';
 import { SamlOptions } from '@node-saml/node-saml/lib';
 import difference from 'lodash.difference';
+import { isISODateTimeUTC } from './util';
 
 export class SpidResponse extends XML.XML {
   validate(req: SpidRequest, config: SpidConfig, saml: SamlOptions) {
-    const isISODate = (s: string): boolean => {
-      const n = Date.parse(s);
-      if (isNaN(n)) return false;
-      else {
-        const iso = new Date(n).toISOString();
-        return s === iso || s === iso.replace(/\.\d\d\dZ$/, 'Z');
-      }
-    };
     assert(this.response, `Missing response`);
     assert(this.assertion, `Missing assertion`);
     const { SAML_ASSERTION: A, SAML_PROTOCOL: P } = NS;
-    console.log(this.getElements('Issuer', A).length);
     const responseIssuer = this.getElements('Issuer', A).find(
       (x) => (x.parentNode as Element).localName === 'Response',
     );
@@ -93,7 +85,6 @@ export class SpidResponse extends XML.XML {
         })),
       },
     };
-
     // ID
     assert(data.id, `Missing ID`);
     // Version
@@ -103,16 +94,17 @@ export class SpidResponse extends XML.XML {
       `Invalid  SAML version "${data.version}"`,
     );
     // IssueInstant
-    assert(
-      isISODate(data.issueInstant) &&
-        isISODate(data.assertion.issueInstant) &&
-        data.issueInstant === data.assertion.issueInstant &&
-        dayjs(data.issueInstant).isAfter(req.issueInstant) &&
-        dayjs(data.issueInstant).isBefore(
-          req.issueInstant.valueOf() + saml.requestIdExpirationPeriodMs,
-        ),
-      `Invalid IssueInstant "${data.issueInstant}"`,
-    );
+    const assertIssueInstant = (ii) =>
+      assert(
+        isISODateTimeUTC(ii) &&
+          !dayjs(ii).isBefore(req.issueInstant) &&
+          dayjs(ii).isBefore(
+            req.issueInstant.valueOf() + saml.requestIdExpirationPeriodMs,
+          ),
+        `Invalid IssueInstant "${data.issueInstant}"`,
+      );
+    assertIssueInstant(data.issueInstant);
+    assertIssueInstant(data.assertion.issueInstant);
     // Destination
     assert.equal(
       data.destination,
@@ -136,15 +128,11 @@ export class SpidResponse extends XML.XML {
       saml.idpIssuer,
       `Invalid Assertion Issuer "${data.assertion.issuer}"`,
     );
-    assert.equal(
-      data.issuerFormat,
-      ISSUER_FORMAT,
+    assert(
+      (!responseIssuer.hasAttribute('Format') ||
+        responseIssuer.getAttribute('Format') === ISSUER_FORMAT) &&
+        assIssuer.getAttribute('Format') === ISSUER_FORMAT,
       `Invalid Issuer Format "${data.issuerFormat}"`,
-    );
-    assert.equal(
-      data.assertion.issuerFormat,
-      ISSUER_FORMAT,
-      `Invalid Issuer Format "${data.assertion.issuerFormat}"`,
     );
     assert.equal(
       data.assertion.version,
@@ -182,7 +170,7 @@ export class SpidResponse extends XML.XML {
       `Invalid SubjectConfirmation`,
     );
     assert(
-      isISODate(data.subject.confirmation.data.notOnOrAfter),
+      isISODateTimeUTC(data.subject.confirmation.data.notOnOrAfter),
       `Invalid SubjectConfirmation`,
     );
     assert(
@@ -193,7 +181,7 @@ export class SpidResponse extends XML.XML {
     );
     // Conditions
     assert(
-      isISODate(data.assertion.conditions.notBefore),
+      isISODateTimeUTC(data.assertion.conditions.notBefore),
       `Invalid Conditions`,
     );
     assert(
@@ -201,7 +189,7 @@ export class SpidResponse extends XML.XML {
       `Invalid Conditions`,
     );
     assert(
-      isISODate(data.assertion.conditions.notOnOrAfter),
+      isISODateTimeUTC(data.assertion.conditions.notOnOrAfter),
       `Invalid Conditions`,
     );
     assert(
@@ -224,10 +212,6 @@ export class SpidResponse extends XML.XML {
     const attributes = data.assertion.attributes.map((a) => a.name);
     const expected =
       config.spid.serviceProvider.acs[serviceIndex]?.attributes ?? [];
-    assert(
-      data.assertion.attributes.every((attr) => attr.nameFormat),
-      `Missing Attributes NameFormat`,
-    );
     assert(
       data.assertion.attributes.every((attr) => typeof attr.value === 'string'),
       `Missing Attributes value`,

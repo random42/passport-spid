@@ -24,13 +24,13 @@ services:
     volumes:
       - config:/certs:rw
   web:
-    build: .
+    build: ..
     command: "npm run dev" 
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:4000"]
-      interval: 10s
+      interval: 3s
       timeout: 5s
-      retries: 2
+      retries: 3
       start_period: 3s
     depends_on:
       keygen:
@@ -46,8 +46,9 @@ services:
       IDP_METADATA_FILE: "config/idp.xml"
       PRIVATE_KEY_FILE: "config/key.pem"
       CERTIFICATE_FILE: "config/crt.pem"
-      BINDING: HTTP-Redirect
-      SIG_ALG: "sha512"
+      RAC_COMPARISON: ${RAC_COMPARISON}
+      BINDING: ${BINDING}
+      SIG_ALG: ${ALG}
     ports:
       - 4000:4000
       - 9229:9229
@@ -59,7 +60,7 @@ services:
       --request-method GET \
       --extra \
       --test-response \
-      -d WARNING
+      -d ${LOG_LEVEL}
       "
     depends_on:
       web:

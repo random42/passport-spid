@@ -15,7 +15,7 @@ services:
     volumes:
       - config:/certs:rw
   spid:
-    image: "italia/spid-saml-check:latest"
+    image: "italia/spid-saml-check:1.9.2"
     ports:
       - "8443:8443"
   web:
@@ -29,7 +29,7 @@ services:
       start_period: 3s
     depends_on:
       spid:
-        condition: service_healthy
+        condition: service_started
       keygen:
         condition: service_completed_successfully
     volumes:

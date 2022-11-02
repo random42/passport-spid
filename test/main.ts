@@ -25,6 +25,7 @@ const {
   CERTIFICATE_FILE,
   BINDING,
   SIG_ALG,
+  RAC_COMPARISON,
 } = process.env;
 
 async function run() {
@@ -47,7 +48,7 @@ async function run() {
       callbackUrl: `${SP}/login/cb`,
       logoutCallbackUrl: `${SP}/logout/cb`,
       authnContext: ['SpidL1'],
-      racComparison: 'minimum',
+      racComparison: RAC_COMPARISON as any,
       privateKey,
       audience: SP,
     },
