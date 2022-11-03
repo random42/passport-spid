@@ -45,7 +45,6 @@ async function run() {
       digestAlgorithm: 'sha256',
       callbackUrl: `${sp}/login/cb`,
       logoutCallbackUrl: `${sp}/logout/cb`,
-      authnContext: ['SpidL1'],
       racComparison: 'minimum',
       privateKey,
       audience: sp,
@@ -53,6 +52,7 @@ async function run() {
     spid: {
       getIDPEntityIdFromRequest: (req) => idp,
       IDPRegistryMetadata: idpMetadata,
+      authnContext: 'SpidL1',
       serviceProvider: {
         type: 'public',
         entityId: sp,

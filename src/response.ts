@@ -88,7 +88,7 @@ export class SpidResponse extends XML.XML {
     // ID
     assert(data.id, `Missing ID`);
     // Version
-    assert.equal(
+    assert.strictEqual(
       data.version,
       '2.0',
       `Invalid  SAML version "${data.version}"`,
@@ -106,24 +106,24 @@ export class SpidResponse extends XML.XML {
     assertIssueInstant(data.issueInstant);
     assertIssueInstant(data.assertion.issueInstant);
     // Destination
-    assert.equal(
+    assert.strictEqual(
       data.destination,
       config.saml.callbackUrl,
       `Invalid Destination "${data.destination}"`,
     );
     // StatusCode
-    assert.equal(
+    assert.strictEqual(
       data.statusCode,
       'urn:oasis:names:tc:SAML:2.0:status:Success',
       `Invalid StatusCode "${data.statusCode}"`,
     );
     // Issuer
-    assert.equal(
+    assert.strictEqual(
       data.issuer,
       saml.idpIssuer,
       `Invalid Issuer "${data.issuer}"`,
     );
-    assert.equal(
+    assert.strictEqual(
       data.assertion.issuer,
       saml.idpIssuer,
       `Invalid Assertion Issuer "${data.assertion.issuer}"`,
@@ -134,35 +134,35 @@ export class SpidResponse extends XML.XML {
         assIssuer.getAttribute('Format') === ISSUER_FORMAT,
       `Invalid Issuer Format "${data.issuerFormat}"`,
     );
-    assert.equal(
+    assert.strictEqual(
       data.assertion.version,
       '2.0',
       `Invalid Assertion Version "${data.assertion.version}"`,
     );
     // Subject
     assert(data.subject.nameId, `Invalid NameID "${data.subject.nameId}"`);
-    assert.equal(
+    assert.strictEqual(
       data.subject.nameIdFormat,
       IDENTIFIER_FORMAT,
       `Invalid NameID Format "${data.subject.nameIdFormat}"`,
     );
-    assert.equal(
+    assert.strictEqual(
       data.subject.nameIdQualifier,
       saml.idpIssuer,
       `Invalid NameQualifier "${data.subject.nameIdQualifier}"`,
     );
     // SubjectConfirmation
-    assert.equal(
+    assert.strictEqual(
       data.subject.confirmation.method,
       SUBJECT_CONFIRMATION_METHOD,
       `Invalid SubjectConfirmation`,
     );
-    assert.equal(
+    assert.strictEqual(
       data.subject.confirmation.data.inResponseTo,
       req.id,
       `Invalid SubjectConfirmation`,
     );
-    assert.equal(
+    assert.strictEqual(
       data.subject.confirmation.data.recipient,
       req
         .getElement('AuthnRequest', P)
@@ -197,11 +197,29 @@ export class SpidResponse extends XML.XML {
       `Invalid Conditions`,
     );
     // AuthnStatement
-    const LEVELS = Object.values(SPID_LEVELS);
+    const { authnContext } = data.assertion;
+    const authnError = `Invalid AuthnContext "${data.assertion.authnContext}"`;
     assert(
-      LEVELS.includes(data.assertion.authnContext as any),
-      `Invalid AuthnContext "${data.assertion.authnContext}"`,
+      Object.values(SPID_LEVELS).includes(authnContext as any),
+      authnError,
     );
+    const reqLevel = config.spid.authnContext;
+    const level = +authnContext.slice(-1, authnContext.length);
+    const { racComparison } = saml;
+    // nice rules SPID -_-
+    switch (racComparison) {
+      case 'exact':
+        assert(level >= reqLevel, authnError);
+        break;
+      case 'better':
+        assert(level > reqLevel, authnError);
+        break;
+      case 'minimum':
+        assert(level >= reqLevel, authnError);
+        break;
+      case 'maximum':
+        break;
+    }
     // AttributeStatement
     const serviceIndex = parseInt(
       req
@@ -216,8 +234,12 @@ export class SpidResponse extends XML.XML {
       data.assertion.attributes.every((attr) => typeof attr.value === 'string'),
       `Missing Attributes value`,
     );
-    assert.equal(attributes.length, expected.length, `Attributes mismatch`);
-    assert.equal(
+    assert.strictEqual(
+      attributes.length,
+      expected.length,
+      `Attributes mismatch`,
+    );
+    assert.strictEqual(
       difference(attributes, expected).length,
       0,
       `Attributes mismatch`,

@@ -43,6 +43,7 @@ services:
       CERTIFICATE_FILE: "config/crt.pem"
       BINDING: HTTP-Redirect
       SIG_ALG: "sha512"
+      AUTHN_CONTEXT: SpidL1
     ports:
       - 4000:4000
       - 9229:9229

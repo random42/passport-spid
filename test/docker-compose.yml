@@ -49,6 +49,7 @@ services:
       RAC_COMPARISON: ${RAC_COMPARISON}
       BINDING: ${BINDING}
       SIG_ALG: ${ALG}
+      AUTHN_CONTEXT: ${AUTHN_CONTEXT}
     ports:
       - 4000:4000
       - 9229:9229

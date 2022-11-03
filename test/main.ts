@@ -26,7 +26,10 @@ const {
   BINDING,
   SIG_ALG,
   RAC_COMPARISON,
+  AUTHN_CONTEXT,
 } = process.env;
+
+console.log(process.env);
 
 async function run() {
   const app = express();
@@ -47,14 +50,14 @@ async function run() {
       digestAlgorithm: SIG_ALG as DigestAlgorithm,
       callbackUrl: `${SP}/login/cb`,
       logoutCallbackUrl: `${SP}/logout/cb`,
-      authnContext: ['SpidL1'],
       racComparison: RAC_COMPARISON as any,
       privateKey,
-      audience: SP,
+      // audience: SP,
     },
     spid: {
       getIDPEntityIdFromRequest: () => IDP,
       IDPRegistryMetadata: idpMetadata,
+      authnContext: +AUTHN_CONTEXT as any,
       serviceProvider: {
         type: 'public',
         entityId: SP,

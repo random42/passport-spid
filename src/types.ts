@@ -116,7 +116,7 @@ export type DynamicSamlConfig =
   | 'logoutUrl'
   | 'issuer'
   | 'idpIssuer'
-  // | 'audience'
+  | 'authnContext'
   | 'forceAuthn'
   | 'skipRequestCompression';
 export type OmitSamlConfig = ForcedSamlConfig | DynamicSamlConfig;
@@ -130,7 +130,6 @@ export interface SpidSamlConfig extends Omit<SamlConfig, OmitSamlConfig> {
   callbackUrl: string;
   privateKey: string | Buffer;
   digestAlgorithm: DigestAlgorithm;
-  authnContext: SpidLevel[];
   signatureAlgorithm: SignatureAlgorithm;
   logoutCallbackUrl: string;
   authnRequestBinding: 'HTTP-Redirect' | 'HTTP-POST';
@@ -154,6 +153,7 @@ export interface SpidConfig extends StrategyOptions {
     serviceProvider: ServiceProviderConfig;
     IDPRegistryMetadata: string;
     getIDPEntityIdFromRequest: (req: Request) => string | Promise<string>;
+    authnContext: SpidLevel;
   };
   cache: Cache;
 }

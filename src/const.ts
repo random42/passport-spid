@@ -4,14 +4,13 @@ import {
 } from '@node-saml/node-saml/lib/types';
 
 export const SPID_LEVELS = {
-  SpidL1: 'https://www.spid.gov.it/SpidL1',
-  SpidL2: 'https://www.spid.gov.it/SpidL2',
-  SpidL3: 'https://www.spid.gov.it/SpidL3',
+  1: 'https://www.spid.gov.it/SpidL1',
+  2: 'https://www.spid.gov.it/SpidL2',
+  3: 'https://www.spid.gov.it/SpidL3',
 } as const;
 
 export const FORCE_AUTHN_LEVELS: ReadonlyArray<keyof typeof SPID_LEVELS> = [
-  'SpidL2',
-  'SpidL3',
+  2, 3,
 ];
 
 export const SPID_IDP_IDENTIFIERS = {

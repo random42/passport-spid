@@ -125,7 +125,7 @@ export class SpidStrategy extends MultiSamlStrategy {
       throw new Error(`Provider '${entityId}' not found`);
     }
     idp ??= idps[0]; // default for metadata generation
-    const authnContext = saml.authnContext.map((s) => SPID_LEVELS[s]);
+    const { authnContext } = config.spid;
     return Object.assign(
       {},
       saml,
@@ -133,10 +133,8 @@ export class SpidStrategy extends MultiSamlStrategy {
         additionalParams: {
           RelayState: 'RelayState',
         },
-        authnContext,
-        forceAuthn: saml.authnContext.some((c) =>
-          FORCE_AUTHN_LEVELS.includes(c),
-        ),
+        authnContext: [SPID_LEVELS[config.spid.authnContext]],
+        forceAuthn: FORCE_AUTHN_LEVELS.includes(authnContext),
         passReqToCallback: config.passReqToCallback,
         issuer: spid.serviceProvider.entityId,
         idpIssuer: idp.entityId,
