@@ -51,7 +51,6 @@ services:
       SIG_ALG: ${ALG}
       AUTHN_CONTEXT: ${AUTHN_CONTEXT}
     # ports:
-    #   - 4000:4000
     #   - 9229:9229
   test:
     image: "ghcr.io/italia/spid-sp-test:latest"

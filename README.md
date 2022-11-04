@@ -3,7 +3,7 @@
 [![npm package][npm-img]][npm-url]
 [![Downloads][downloads-img]][downloads-url]
 
-> A passport strategy for [SPID](https://developers.italia.it/it/spid/), an extension of the SAML2 protocol.
+> A passport strategy for [SPID](https://developers.italia.it/it/spid/), an extension (not really) of the SAML2 protocol.
 
 ## Features
 
@@ -11,8 +11,8 @@
 - Built on the latest versions of [node-saml](https://github.com/node-saml/node-saml) and [passport-saml](https://github.com/node-saml/passport-saml)
 - Full typings for the SPID metadata specs
 - Custom SAML options, if SPID compliant
-- Custom request cache
-- Custom function to get Identity Providers' registry XML
+- Custom request cache (example with Redis, but you can use a js Map)
+- Load identity providers from xml metadata
 
 ## Install
 
@@ -24,23 +24,26 @@ npm i passport-spid
 
 ```typescript
 import express from 'express';
-import { promises as fs } from 'fs';
+import fs from 'fs-extra';
 import Redis from 'ioredis';
 import passport from 'passport';
-import { SpidStrategy, SpidConfig, Cache, SamlSpidProfile } from 'passport-spid';
+import { SpidStrategy, SpidConfig, SamlSpidProfile } from '../src';
 
 async function run() {
-  const redis = new Redis();
-  const idpMetadata = (await fs.readFile('./var/idp.xml')).toString();
+  const app = express();
+  const redis = new Redis('redis://redis');
+  const idp = 'https://localhost:8443';
+  const idpMetadata = (
+    await fs.readFile('./path/to/idp-metadata.xml')
+  ).toString();
   const sp = 'http://localhost:4000';
-  const idp = 'https://localhost:8443/demo';
-  const privateKey = (await fs.readFile('./var/keys/key.pem')).toString();
-  const spCert = (await fs.readFile('./var/keys/crt.pem')).toString();
+  const privateKey = (await fs.readFile('./path/to/key.pem')).toString();
+  const spCert = (await fs.readFile('./path/to/crt.pem')).toString();
   const email = 'asd@example.com';
-  // you can use a normal Map (not recommended for scaling applications)
+  // you can use a normal Map (not recommended)
   // const cache = new Map();
   const cachePrefix = 'spid_request_';
-  const cache: Cache = {
+  const cache: SpidConfig['cache'] = {
     get(key: string) {
       return redis.get(cachePrefix + key);
     },
@@ -56,18 +59,20 @@ async function run() {
   };
   const config: SpidConfig = {
     saml: {
+      authnRequestBinding: 'HTTP-POST', // or HTTP-Redirect
       attributeConsumingServiceIndex: '0', // index of 'acs' array
       signatureAlgorithm: 'sha256',
+      digestAlgorithm: 'sha256',
       callbackUrl: `${sp}/login/cb`,
       logoutCallbackUrl: `${sp}/logout/cb`,
-      authnContext: ['SpidL1'],
       racComparison: 'minimum',
       privateKey,
-      requestIdExpirationPeriodMs: 30000,
+      audience: sp,
     },
     spid: {
-      getIDPEntityIdFromRequest: (req) => idp, // maybe req.query.entityId in production
-      getIDPRegistryMetadata: () => idpMetadata, // get identity providers registry metadata xml however you like
+      getIDPEntityIdFromRequest: (req) => idp,
+      IDPRegistryMetadata: idpMetadata,
+      authnContext: 1, // spid level (1/2/3)
       serviceProvider: {
         type: 'public',
         entityId: sp,
@@ -75,7 +80,7 @@ async function run() {
         acs: [
           {
             name: 'acs0',
-            attributes: ['spidCode'],
+            attributes: ['spidCode', 'email', 'fiscalNumber'],
           },
           {
             name: 'acs1',
@@ -101,20 +106,13 @@ async function run() {
     done(null, profile as any);
   };
   const strategy = new SpidStrategy(config, verify, verify);
-  // initialize to get identity providers from xml
-  await strategy.init();
+  const metadata = await strategy.generateSpidServiceProviderMetadata();
   passport.use('spid', strategy);
   const passportOptions = {
     session: false,
   };
-  const app = express();
-  app.use(
-    express.json(),
-    passport.initialize(),
-  );
+  app.use(passport.initialize());
   app.get('/metadata', async (req, res) => {
-    // you should cache this
-    const metadata = await strategy.generateSpidServiceProviderMetadata();
     res.contentType('text/xml');
     res.send(metadata);
   });
@@ -131,32 +129,30 @@ async function run() {
       res.send(user);
     },
   );
+  app.use((err, req, res, next) => {
+    console.error(err);
+    res.status(500).send(err?.message);
+  });
+  app.listen(4000, () => {
+    console.log(sp);
+    console.log(idp);
+  });
 }
+
+run().catch(console.error);
 ```
 
-## Development setup
+## Development
 
 Prerequisites:
 
 - Docker and docker-compose
 
-```sh
-# make scripts executable
-chmod -R u+x scripts
-# generate key and certificate
-scripts/keygen.sh var/keys \
-  --key-size 3072 \
-  --common-name "example" \
-  --days 365 \
-  --entity-id http://localhost:4000 \
-  --locality-name Roma \
-  --org-id "PA:IT-c_h501" \
-  --org-name "example" \
-  --sector public
-# start docker compose
-docker-compose up
-# open localhost:4000/login
 ```
+npm run test
+```
+
+Will run `sp-test` with various SPID configurations (see test/test.sh).
 
 [downloads-img]:https://img.shields.io/npm/dt/passport-spid
 [downloads-url]:https://www.npmtrends.com/passport-spid

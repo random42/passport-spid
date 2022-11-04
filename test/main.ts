@@ -29,8 +29,6 @@ const {
   AUTHN_CONTEXT,
 } = process.env;
 
-console.log(process.env);
-
 async function run() {
   const app = express();
   let idpMetadata;

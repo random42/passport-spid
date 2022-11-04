@@ -3,17 +3,11 @@ import {
   MultiSamlStrategy,
   SamlConfig,
 } from '@node-saml/passport-saml';
-import { generateServiceProviderMetadata } from '@node-saml/node-saml/lib/metadata';
 import type { Request } from 'express';
 import { callbackify } from 'util';
 import { getIdentityProviders } from './idp-metadata';
 import { SPMetadata } from './sp-metadata';
-import {
-  IDPConfig,
-  SamlSpidProfile,
-  SpidConfig,
-  SpidSamlConfig,
-} from './types';
+import { IDPConfig, SamlSpidProfile, SpidConfig } from './types';
 import {
   SPID_LEVELS,
   SPID_FORCED_SAML_CONFIG,

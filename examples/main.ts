@@ -1,24 +1,19 @@
 import express from 'express';
 import fs from 'fs-extra';
 import Redis from 'ioredis';
-import axios from 'axios';
 import passport from 'passport';
 import { SpidStrategy, SpidConfig, SamlSpidProfile } from '../src';
-export const sleep = (ms) => new Promise((res) => setTimeout(res, ms));
-
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
 async function run() {
   const app = express();
   const redis = new Redis('redis://redis');
-  // const idp = 'https://localhost:8080';
   const idp = 'https://localhost:8443';
-  const idpMetadataUrl = 'https://spid:8443/metadata.xml';
-  const idpMetadata = (await axios(idpMetadataUrl)).data;
-  // const idpMetadata = (await fs.readFile('./var/idp-test.xml')).toString();
+  const idpMetadata = (
+    await fs.readFile('./path/to/idp-metadata.xml')
+  ).toString();
   const sp = 'http://localhost:4000';
-  const privateKey = (await fs.readFile('./var/keys/key.pem')).toString();
-  const spCert = (await fs.readFile('./var/keys/crt.pem')).toString();
+  const privateKey = (await fs.readFile('./path/to/key.pem')).toString();
+  const spCert = (await fs.readFile('./path/to/crt.pem')).toString();
   const email = 'asd@example.com';
   // you can use a normal Map (not recommended)
   // const cache = new Map();
@@ -39,7 +34,7 @@ async function run() {
   };
   const config: SpidConfig = {
     saml: {
-      authnRequestBinding: 'HTTP-POST',
+      authnRequestBinding: 'HTTP-POST', // or HTTP-Redirect
       attributeConsumingServiceIndex: '0', // index of 'acs' array
       signatureAlgorithm: 'sha256',
       digestAlgorithm: 'sha256',
@@ -52,7 +47,7 @@ async function run() {
     spid: {
       getIDPEntityIdFromRequest: (req) => idp,
       IDPRegistryMetadata: idpMetadata,
-      authnContext: 'SpidL1',
+      authnContext: 1, // spid level (1/2/3)
       serviceProvider: {
         type: 'public',
         entityId: sp,
@@ -91,22 +86,8 @@ async function run() {
   const passportOptions = {
     session: false,
   };
-  app.use(
-    express.json(),
-    (req, res, next) => {
-      console.error(
-        JSON.stringify({
-          path: req.path,
-          query: req.query,
-        }),
-      );
-      next();
-    },
-    passport.initialize(),
-  );
-  app.get('/', (req, res) => res.sendStatus(200));
+  app.use(passport.initialize());
   app.get('/metadata', async (req, res) => {
-    // you should cache this
     res.contentType('text/xml');
     res.send(metadata);
   });
@@ -130,7 +111,6 @@ async function run() {
   app.listen(4000, () => {
     console.log(sp);
     console.log(idp);
-    console.log('http://server:4000/');
   });
 }
 
