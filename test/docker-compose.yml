@@ -50,9 +50,9 @@ services:
       BINDING: ${BINDING}
       SIG_ALG: ${ALG}
       AUTHN_CONTEXT: ${AUTHN_CONTEXT}
-    ports:
-      - 4000:4000
-      - 9229:9229
+    # ports:
+    #   - 4000:4000
+    #   - 9229:9229
   test:
     image: "ghcr.io/italia/spid-sp-test:latest"
     command: "-pr spid-sp-public
@@ -61,7 +61,7 @@ services:
       --request-method GET \
       --extra \
       --test-response \
-      -d ${LOG_LEVEL}
+      -d ${DEBUG}
       "
     depends_on:
       web:

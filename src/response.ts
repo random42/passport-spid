@@ -206,7 +206,7 @@ export class SpidResponse extends XML.XML {
     const reqLevel = config.spid.authnContext;
     const level = +authnContext.slice(-1, authnContext.length);
     const { racComparison } = saml;
-    // nice rules SPID -_-
+    // nice rules -_-
     switch (racComparison) {
       case 'exact':
         assert(level >= reqLevel, authnError);
