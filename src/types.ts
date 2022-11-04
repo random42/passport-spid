@@ -1,6 +1,7 @@
 import type { Request } from 'express';
 import { SamlConfig, Profile } from '@node-saml/passport-saml';
 import { SPID_LEVELS, SPID_FORCED_SAML_CONFIG } from './const';
+import { RacComparision } from '@node-saml/node-saml/lib/types';
 
 export type SpidLevel = keyof typeof SPID_LEVELS;
 
@@ -133,6 +134,7 @@ export interface SpidSamlConfig extends Omit<SamlConfig, OmitSamlConfig> {
   signatureAlgorithm: SignatureAlgorithm;
   logoutCallbackUrl: string;
   authnRequestBinding: 'HTTP-Redirect' | 'HTTP-POST';
+  racComparison: Exclude<RacComparision, 'better'>;
 }
 
 export interface Cache {
