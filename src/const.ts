@@ -1,7 +1,4 @@
-import {
-  SamlConfig,
-  ValidateInResponseTo,
-} from '@node-saml/node-saml/lib/types';
+import { ValidateInResponseTo } from '@node-saml/node-saml/lib/types';
 
 export const SPID_LEVELS = {
   1: 'https://www.spid.gov.it/SpidL1',
