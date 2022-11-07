@@ -1,14 +1,7 @@
 import express from 'express';
 import fs from 'fs-extra';
 import passport from 'passport';
-import {
-  SpidStrategy,
-  SpidConfig,
-  SamlSpidProfile,
-  SignatureAlgorithm,
-  SpidSamlConfig,
-  DigestAlgorithm,
-} from '../src';
+import { SpidStrategy, SpidConfig, SamlSpidProfile } from '../src';
 import dotenv from 'dotenv';
 import axios from 'axios';
 
@@ -42,10 +35,10 @@ async function run() {
   const email = 'asd@example.com';
   const config: SpidConfig = {
     saml: {
-      authnRequestBinding: BINDING as SpidSamlConfig['authnRequestBinding'],
+      authnRequestBinding: BINDING as any,
       attributeConsumingServiceIndex: '0', // index of 'acs' array
-      signatureAlgorithm: SIG_ALG as SignatureAlgorithm,
-      digestAlgorithm: SIG_ALG as DigestAlgorithm,
+      signatureAlgorithm: SIG_ALG as any,
+      digestAlgorithm: SIG_ALG as any,
       callbackUrl: `${SP}/login/cb`,
       logoutCallbackUrl: `${SP}/logout/cb`,
       racComparison: RAC_COMPARISON as any,
@@ -127,7 +120,7 @@ async function run() {
     },
   );
   app.use((err, req, res, next) => {
-    console.error(err);
+    console.log(err);
     res.status(500).send(err?.message);
   });
   app.listen(4000, () => {

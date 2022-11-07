@@ -74,8 +74,8 @@ export interface AttributeConsumingService {
   attributes: ReadonlyArray<SpidAttribute>;
 }
 
-export interface CommonServiceProviderConfig {
-  type: 'public' | 'private';
+export interface CommonServiceProvider {
+  type: string;
   entityId: string;
   certificate: string;
   acs: AttributeConsumingService[];
@@ -87,8 +87,7 @@ export interface CommonServiceProviderConfig {
   billingContactPerson?: BillingContactPerson;
 }
 
-export interface PrivateServiceProviderConfig
-  extends CommonServiceProviderConfig {
+export interface PrivateServiceProvider extends CommonServiceProvider {
   type: 'private';
   billingContactPerson: BillingContactPerson;
 }
@@ -97,18 +96,17 @@ export interface PublicContactPerson extends ContactPerson {
   IPACode: string;
 }
 
-export interface PublicServiceProviderConfig
-  extends CommonServiceProviderConfig {
+export interface PublicServiceProvider extends CommonServiceProvider {
   type: 'public';
   contactPerson: PublicContactPerson;
 }
 
-export type ServiceProviderConfig =
-  | PrivateServiceProviderConfig
-  | PublicServiceProviderConfig;
+export type ServiceProvider = PrivateServiceProvider | PublicServiceProvider;
 
 export type SignatureAlgorithm = 'sha256' | 'sha512';
 export type DigestAlgorithm = 'sha256' | 'sha512';
+export type Binding = 'HTTP-Redirect' | 'HTTP-POST';
+export type RacComparison = Exclude<RacComparision, 'better'>;
 
 export type ForcedSamlConfig = keyof typeof SPID_FORCED_SAML_CONFIG;
 export type DynamicSamlConfig =
@@ -127,14 +125,16 @@ export interface StrategyOptions {
   passReqToCallback?: boolean;
 }
 
-export interface SpidSamlConfig extends Omit<SamlConfig, OmitSamlConfig> {
+export interface SpidSamlConfig
+  extends Omit<SamlConfig, OmitSamlConfig | keyof StrategyOptions> {
   callbackUrl: string;
+  authnRequestBinding: Binding;
   privateKey: string | Buffer;
   digestAlgorithm: DigestAlgorithm;
   signatureAlgorithm: SignatureAlgorithm;
+  attributeConsumingServiceIndex: string;
   logoutCallbackUrl: string;
-  authnRequestBinding: 'HTTP-Redirect' | 'HTTP-POST';
-  racComparison: Exclude<RacComparision, 'better'>;
+  racComparison: RacComparison;
 }
 
 export interface Cache {
@@ -152,7 +152,7 @@ export interface Cache {
 export interface SpidConfig extends StrategyOptions {
   saml: SpidSamlConfig;
   spid: {
-    serviceProvider: ServiceProviderConfig;
+    serviceProvider: ServiceProvider;
     IDPRegistryMetadata: string;
     getIDPEntityIdFromRequest: (req: Request) => string | Promise<string>;
     authnContext: SpidLevel;

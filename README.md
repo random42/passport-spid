@@ -27,7 +27,7 @@ import express from 'express';
 import fs from 'fs-extra';
 import Redis from 'ioredis';
 import passport from 'passport';
-import { SpidStrategy, SpidConfig, SamlSpidProfile } from '../src';
+import { SpidStrategy, SpidConfig, SamlSpidProfile, Cache } from '../src';
 
 async function run() {
   const app = express();
@@ -43,7 +43,7 @@ async function run() {
   // you can use a normal Map (not recommended)
   // const cache = new Map();
   const cachePrefix = 'spid_request_';
-  const cache: SpidConfig['cache'] = {
+  const cache: Cache = {
     get(key: string) {
       return redis.get(cachePrefix + key);
     },
@@ -124,19 +124,12 @@ async function run() {
     (req, res) => {
       const user = req.user as SamlSpidProfile;
       // you can save request and response
-      // user.getSamlRequestXml();
-      // user.getSamlResponseXml();
+      const samlRequest = user.getSamlRequestXml();
+      const samlResponse = user.getSamlResponseXml();
       res.send(user);
     },
   );
-  app.use((err, req, res, next) => {
-    console.error(err);
-    res.status(500).send(err?.message);
-  });
-  app.listen(4000, () => {
-    console.log(sp);
-    console.log(idp);
-  });
+  app.listen(4000);
 }
 
 run().catch(console.error);
