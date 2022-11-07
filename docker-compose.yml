@@ -34,6 +34,7 @@ services:
         condition: service_completed_successfully
     volumes:
       - config:/app/config:ro
+      - ./src:/app/src
     environment:
       NODE_TLS_REJECT_UNAUTHORIZED: 0
       IDP: "https://localhost:8443"

@@ -2,6 +2,7 @@ var/
 dist/
 node_modules/
 config/
+*.env
 
 .history
 

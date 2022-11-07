@@ -14,6 +14,10 @@
 - Custom request cache (example with Redis, but you can use a js Map)
 - Load identity providers from xml metadata
 
+## Notes
+
+Production identity providers can be found here: <https://registry.spid.gov.it/entities-idp>
+
 ## Install
 
 ```bash
