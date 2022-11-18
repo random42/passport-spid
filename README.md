@@ -31,7 +31,7 @@ import express from 'express';
 import fs from 'fs-extra';
 import Redis from 'ioredis';
 import passport from 'passport';
-import { SpidStrategy, SpidConfig, SamlSpidProfile, Cache } from '../src';
+import { SpidStrategy, SpidConfig, SamlSpidProfile, Cache } from 'passport-spid';
 
 async function run() {
   const app = express();
