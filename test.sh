@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 set -e
 
 C="./test/docker-compose.yml"
