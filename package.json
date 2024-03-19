@@ -33,7 +33,8 @@
     "build": "tsc",
     "prepare": "run-s build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
-    "lint": "eslint \"{src,test}/**/*.ts\" --fix"
+    "lint": "eslint \"{src,test}/**/*.ts\" --fix",
+    "test": "bash ./test.sh"
   },
   "dependencies": {
     "@node-saml/node-saml": "^4.0.0",
