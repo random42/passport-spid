@@ -15,7 +15,12 @@ import difference from 'lodash.difference';
 import { isISODateTimeUTC } from './util';
 
 export class SpidResponse extends XML.XML {
-  validate(req: SpidRequest, config: SpidConfig, saml: SamlOptions) {
+  validate(
+    req: SpidRequest,
+    config: SpidConfig,
+    saml: SamlOptions,
+    idpIssuer: string,
+  ) {
     assert(this.response, `Missing response`);
     assert(this.assertion, `Missing assertion`);
     const { SAML_ASSERTION: A, SAML_PROTOCOL: P } = NS;
@@ -120,12 +125,12 @@ export class SpidResponse extends XML.XML {
     // Issuer
     assert.strictEqual(
       data.issuer,
-      saml.idpIssuer,
+      idpIssuer,
       `Invalid Issuer "${data.issuer}"`,
     );
     assert.strictEqual(
       data.assertion.issuer,
-      saml.idpIssuer,
+      idpIssuer,
       `Invalid Assertion Issuer "${data.assertion.issuer}"`,
     );
     assert(
