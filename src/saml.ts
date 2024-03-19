@@ -30,20 +30,16 @@ export class SpidSAML extends SAML {
       // re-sign request
          //xml = signAuthnRequestPost(xml, this.options as any);
 
-         const { spid, saml } = this.spidConfig;
-         const { privateKey, signatureAlgorithm } = saml;
-         const cert = spid.serviceProvider.certificate;
-         xml = signAuthRequest(xml, {
-           signatureAlgorithm: signatureAlgorithm,
-           privateKey,
-           certificate: cert,
-           action: 'after',
-           nodeName: 'AuthnRequest',
-         });
-         console.log('***************************** SPID DEBUG *********** SIGNED')
-         console.log(xml)
-         console.log('***************************** SPID DEBUG *********** SIGNED')
-         
+        const { spid, saml } = this.spidConfig;
+        const { privateKey, signatureAlgorithm } = saml;
+        const cert = spid.serviceProvider.certificate;
+        xml = signAuthRequest(xml, {
+          signatureAlgorithm: signatureAlgorithm,
+          privateKey,
+          certificate: cert,
+          action: 'after',
+          nodeName: 'AuthnRequest',
+        });
     }
     const { cache } = this.spidConfig;
     await cache.set(id, xml);

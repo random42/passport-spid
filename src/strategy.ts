@@ -114,7 +114,6 @@ export class SpidStrategy extends MultiSamlStrategy {
     const idps = this.idps;
     const { getIDPEntityIdFromRequest } = config.spid;
     const entityId = await getIDPEntityIdFromRequest(req);
-
     let idp = idps.find((x) => x.entityId === entityId);
     if (!idp && entityId) {
       throw new Error(`Provider '${entityId}' not found`);
