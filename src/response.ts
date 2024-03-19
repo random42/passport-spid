@@ -153,7 +153,7 @@ export class SpidResponse extends XML.XML {
     );
     assert.strictEqual(
       data.subject.nameIdQualifier,
-      saml.idpIssuer,
+      idpIssuer,
       `Invalid NameQualifier "${data.subject.nameIdQualifier}"`,
     );
     // SubjectConfirmation
