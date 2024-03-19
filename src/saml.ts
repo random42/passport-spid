@@ -4,6 +4,11 @@ import { SpidRequest } from './request';
 import { SamlSpidProfile, SpidConfig } from './types';
 import { SpidResponse } from './response';
 
+type CacheData = {
+  reqXml: string;
+  idpIssuer: string;
+};
+
 export class SpidSAML extends SAML {
   constructor(samlConfig: SamlConfig, private spidConfig: SpidConfig) {
     super(samlConfig);
@@ -29,7 +34,11 @@ export class SpidSAML extends SAML {
       xml = signAuthnRequestPost(xml, this.options as any);
     }
     const { cache } = this.spidConfig;
-    await cache.set(id, xml);
+    const cacheData: CacheData = {
+      reqXml: xml,
+      idpIssuer: this.options.idpIssuer,
+    };
+    await cache.set(id, JSON.stringify(cacheData));
     const timeoutMs =
       this.options.requestIdExpirationPeriodMs ?? 1000 * 60 * 60 * 15;
     if (cache.expire) {
@@ -51,7 +60,9 @@ export class SpidSAML extends SAML {
       throw new Error(`Missing InResponseTo`);
     }
     const { cache } = this.spidConfig;
-    const reqXml = await cache.get(inResponseTo);
+    const cacheDataJSON = await cache.get(inResponseTo);
+    const cacheData = JSON.parse(cacheDataJSON) as CacheData;
+    const { reqXml } = cacheData;
     if (!reqXml) {
       throw new Error(`Missing request for ${inResponseTo} response`);
     }
@@ -64,7 +75,7 @@ export class SpidSAML extends SAML {
         samlResponseXml,
         inResponseTo,
       );
-    res.validate(req, this.spidConfig, this.options);
+    res.validate(req, this.spidConfig, this.options, cacheData.idpIssuer);
     const p = profile as SamlSpidProfile;
     p.getSamlRequestXml = () => reqXml;
     return { profile: p, loggedOut };

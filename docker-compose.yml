@@ -15,7 +15,7 @@ services:
     volumes:
       - config:/certs:rw
   spid:
-    image: "italia/spid-saml-check:1.9.2"
+    image: "italia/spid-saml-check:1.10.4"
     ports:
       - "8443:8443"
   web:
