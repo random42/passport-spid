@@ -1,5 +1,7 @@
 import { SAML, SamlConfig } from '@node-saml/node-saml';
-import { signAuthnRequestPost } from '@node-saml/node-saml/lib/saml-post-signing';
+// import { signAuthnRequestPost } from '@node-saml/node-saml/lib/saml-post-signing';
+import { signAuthRequest } from './signAuthRequest';
+
 import { SpidRequest } from './request';
 import { SamlSpidProfile, SpidConfig } from './types';
 import { SpidResponse } from './response';
@@ -31,7 +33,18 @@ export class SpidSAML extends SAML {
     xml = req.generate(this.options).xml();
     if (this.options.authnRequestBinding === 'HTTP-POST') {
       // re-sign request
-      xml = signAuthnRequestPost(xml, this.options as any);
+         //xml = signAuthnRequestPost(xml, this.options as any);
+
+        const { spid, saml } = this.spidConfig;
+        const { privateKey, signatureAlgorithm } = saml;
+        const cert = spid.serviceProvider.certificate;
+        xml = signAuthRequest(xml, {
+          signatureAlgorithm: signatureAlgorithm,
+          privateKey,
+          certificate: cert,
+          action: 'after',
+          nodeName: 'AuthnRequest',
+        });
     }
     const { cache } = this.spidConfig;
     const cacheData: CacheData = {
