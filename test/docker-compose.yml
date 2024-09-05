@@ -1,4 +1,3 @@
-version: "3.9"
 services:
   idp:
     image: "ghcr.io/italia/spid-sp-test:latest"
