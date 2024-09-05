@@ -124,9 +124,7 @@ export class SpidStrategy extends MultiSamlStrategy {
       {},
       saml,
       {
-        additionalParams: {
-          RelayState: 'RelayState',
-        },
+        additionalParams: saml.additionalParams ?? { RelayState: 'RelayState' },
         authnContext: [SPID_LEVELS[config.spid.authnContext]],
         forceAuthn: FORCE_AUTHN_LEVELS.includes(authnContext),
         passReqToCallback: config.passReqToCallback,
