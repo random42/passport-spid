@@ -14,18 +14,21 @@ export const getIdpCert = (idp: Element) => {
       idpDescriptor.getElementsByTagNameNS(NS.SAML_METADATA, 'KeyDescriptor'),
     );
     // Look for KeyDescriptor with use="signing" or without use attribute (means both)
-    const signingDescriptor = keyDescriptors.find(
+    const signingDescriptorCollection = keyDescriptors.filter(
       (kd) => kd.getAttribute('use') === 'signing' || !kd.getAttribute('use'),
     );
 
-    const certificateCollection = signingDescriptor?.getElementsByTagNameNS(
-      NS.SIG,
-      'X509Certificate',
-    );
+    const certificates = [];
 
-    const certificates = Array.from(certificateCollection || []).map(
-      (el) => el.textContent,
-    );
+    Array.from(signingDescriptorCollection).forEach((kd) => {
+      const certificateCollection = kd.getElementsByTagNameNS(
+        NS.SIG,
+        'X509Certificate',
+      );
+      Array.from(certificateCollection || []).forEach((el) => {
+        certificates.push(el.textContent);
+      });
+    });
 
     console.log('certificates', certificates);
 
@@ -43,7 +46,7 @@ export const getIdpCert = (idp: Element) => {
         console.log('new Date()', new Date());
         return new Date(validTo) > new Date();
       } catch (e) {
-        console.log('e', e);
+        console.log('Error parsing certificate', e);
         return false;
       }
     });
