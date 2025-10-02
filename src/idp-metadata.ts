@@ -34,7 +34,12 @@ export const getIdpCert = (idp: Element) => {
 
     cert = certificates.find((certificate) => {
       // Find a not expired X509Certificate
-      const { validTo } = new X509Certificate(certificate || '');
+      // Convert from base64 to pem format
+      const pemCert = `-----BEGIN CERTIFICATE-----\n${certificate
+        .match(/.{1,64}/g)
+        .join('\n')}\n-----END CERTIFICATE-----`;
+
+      const { validTo } = new X509Certificate(pemCert || '');
       return new Date(validTo) > new Date();
     });
   }
