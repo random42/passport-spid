@@ -41,11 +41,15 @@ export const getIdpCert = (idp: Element) => {
         .join('\n')}\n-----END CERTIFICATE-----`;
 
       console.log('pemCert', pemCert);
-
-      const { validTo } = new X509Certificate(pemCert || '');
-      console.log('validTo', new Date(validTo));
-      console.log('new Date()', new Date());
-      return new Date(validTo) > new Date();
+      try {
+        const { validTo } = new X509Certificate(pemCert || '');
+        console.log('validTo', new Date(validTo));
+        console.log('new Date()', new Date());
+        return new Date(validTo) > new Date();
+      } catch (e) {
+        console.log('e', e);
+        return false;
+      }
     });
     console.log('cert', cert);
 
