@@ -1,6 +1,51 @@
 import { IDPConfig } from './types';
 import { parseDom } from './xml';
 import { NS } from './const';
+import { X509Certificate } from 'crypto';
+
+export const getIdpCert = (idp: Element) => {
+  console.log('idp', idp);
+  const idpDescriptor = Array.from(
+    idp.getElementsByTagNameNS(NS.SAML_METADATA, 'IDPSSODescriptor'),
+  )[0];
+
+  let cert: string | null | undefined;
+  if (idpDescriptor) {
+    const keyDescriptors = Array.from(
+      idpDescriptor.getElementsByTagNameNS(NS.SAML_METADATA, 'KeyDescriptor'),
+    );
+    // Look for KeyDescriptor with use="signing" or without use attribute (means both)
+    const signingDescriptor = keyDescriptors.find(
+      (kd) => kd.getAttribute('use') === 'signing' || !kd.getAttribute('use'),
+    );
+
+    console.log('signingDescriptor', signingDescriptor);
+
+    const certificateCollection = signingDescriptor?.getElementsByTagNameNS(
+      NS.SIG,
+      'X509Certificate',
+    );
+    console.log('certificateColletion', certificateCollection);
+
+    const certificates = Array.from(certificateCollection || []).map(
+      (el) => el.textContent,
+    );
+
+    console.log('certificates', certificates);
+
+    cert = certificates.find((certificate) => {
+      // Find a not expired X509Certificate
+      // Convert from base64 to pem format
+      const pemCert = `-----BEGIN CERTIFICATE-----\n${certificate
+        .match(/.{1,64}/g)
+        .join('\n')}\n-----END CERTIFICATE-----`;
+
+      const { validTo } = new X509Certificate(pemCert || '');
+      return new Date(validTo) > new Date();
+    });
+  }
+  return cert;
+};
 
 export const getIdentityProviders = (
   xml: string,
@@ -19,10 +64,12 @@ export const getIdentityProviders = (
       Array.from(idp.getElementsByTagNameNS(NS.SAML_METADATA, tag))
         .find((x) => x.getAttribute('Binding') === binding)
         ?.getAttribute('Location');
+
+    // Find a not expired X509Certificate in a keyDescriptor use="signing"
+
     return {
       entityId: idp.getAttribute('entityID'),
-      cert: idp.getElementsByTagNameNS(NS.SIG, 'X509Certificate').item(0)
-        ?.textContent,
+      cert: getIdpCert(idp),
       entryPoint: getLocation('SingleSignOnService'),
       logoutUrl: getLocation('SingleLogoutService'),
     };
