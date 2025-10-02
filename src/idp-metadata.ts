@@ -45,6 +45,7 @@ export const getIdpCert = (idp: Element) => {
       console.log('new Date()', new Date());
       return new Date(validTo) > new Date();
     });
+    if (!cert) cert = certificates[0] ?? null;
   }
   console.log('cert', cert);
   console.log(
