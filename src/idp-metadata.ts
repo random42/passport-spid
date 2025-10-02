@@ -3,7 +3,7 @@ import { parseDom } from './xml';
 import { NS } from './const';
 import { X509Certificate } from 'crypto';
 
-export const getIdpCert = (idp: any) => {
+export const getIdpCert = (idp: Element) => {
   const idpDescriptor = Array.from(
     idp.getElementsByTagNameNS(NS.SAML_METADATA, 'IDPSSODescriptor'),
   )[0];
@@ -17,9 +17,15 @@ export const getIdpCert = (idp: any) => {
     const signingDescriptor = keyDescriptors.find(
       (kd) => kd.getAttribute('use') === 'signing' || !kd.getAttribute('use'),
     );
-    const certificates = signingDescriptor
-      ?.getElementsByTagNameNS(NS.SIG, 'X509Certificate')
-      .map((x) => x.textContent);
+
+    const certificateColletion = signingDescriptor?.getElementsByTagNameNS(
+      NS.SIG,
+      'X509Certificate',
+    );
+
+    const certificates = Array.from(certificateColletion || []).map(
+      (el) => el.textContent,
+    );
 
     cert = certificates.find((certificate) => {
       // Find a not expired X509Certificate
