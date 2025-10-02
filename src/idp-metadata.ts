@@ -41,6 +41,8 @@ export const getIdpCert = (idp: Element) => {
         .join('\n')}\n-----END CERTIFICATE-----`;
 
       const { validTo } = new X509Certificate(pemCert || '');
+      console.log('validTo', validTo);
+      console.log('new Date()', new Date());
       return new Date(validTo) > new Date();
     });
   }
