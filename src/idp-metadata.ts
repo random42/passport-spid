@@ -44,6 +44,11 @@ export const getIdpCert = (idp: Element) => {
       return new Date(validTo) > new Date();
     });
   }
+  console.log('cert', cert);
+  console.log(
+    'old cert',
+    idp.getElementsByTagNameNS(NS.SIG, 'X509Certificate').item(0)?.textContent,
+  );
   return cert;
 };
 
