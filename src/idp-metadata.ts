@@ -18,14 +18,19 @@ export const getIdpCert = (idp: Element) => {
       (kd) => kd.getAttribute('use') === 'signing' || !kd.getAttribute('use'),
     );
 
-    const certificateColletion = signingDescriptor?.getElementsByTagNameNS(
+    console.log('signingDescriptor', signingDescriptor);
+
+    const certificateCollection = signingDescriptor?.getElementsByTagNameNS(
       NS.SIG,
       'X509Certificate',
     );
+    console.log('certificateColletion', certificateCollection);
 
-    const certificates = Array.from(certificateColletion || []).map(
+    const certificates = Array.from(certificateCollection || []).map(
       (el) => el.textContent,
     );
+
+    console.log('certificates', certificates);
 
     cert = certificates.find((certificate) => {
       // Find a not expired X509Certificate
