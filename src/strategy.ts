@@ -140,13 +140,9 @@ export class SpidStrategy extends MultiSamlStrategy {
   }
 
   async generateSpidServiceProviderMetadata() {
-    console.log('generateSpidServiceProviderMetadata');
     const config = this.getSpidConfig();
-    console.log('config', config);
     const { certificate } = config.spid.serviceProvider;
-    console.log('certificate', certificate);
     return new Promise((res, rej) => {
-      console.log('super.generateServiceProviderMetadata');
       super.generateServiceProviderMetadata(
         {} as any,
         null,
@@ -156,7 +152,6 @@ export class SpidStrategy extends MultiSamlStrategy {
           else res(new SPMetadata(xml, config).generate());
         },
       );
-      console.log('super.generateServiceProviderMetadata end');
     });
   }
 }
