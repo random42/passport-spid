@@ -18,8 +18,6 @@ export const getIdpCert = (idp: Element) => {
       (kd) => kd.getAttribute('use') === 'signing' || !kd.getAttribute('use'),
     );
 
-    console.log('signingDescriptor', signingDescriptor);
-
     const certificateCollection = signingDescriptor?.getElementsByTagNameNS(
       NS.SIG,
       'X509Certificate',
