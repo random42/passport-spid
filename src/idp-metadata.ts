@@ -4,7 +4,6 @@ import { NS } from './const';
 import { X509Certificate } from 'crypto';
 
 export const getIdpCert = (idp: Element) => {
-  console.log('idp', idp);
   const idpDescriptor = Array.from(
     idp.getElementsByTagNameNS(NS.SAML_METADATA, 'IDPSSODescriptor'),
   )[0];
