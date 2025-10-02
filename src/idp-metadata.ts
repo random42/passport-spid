@@ -22,7 +22,6 @@ export const getIdpCert = (idp: Element) => {
       NS.SIG,
       'X509Certificate',
     );
-    console.log('certificateColletion', certificateCollection);
 
     const certificates = Array.from(certificateCollection || []).map(
       (el) => el.textContent,
