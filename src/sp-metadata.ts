@@ -1,10 +1,13 @@
-import { ServiceProviderOrganization, SpidConfig } from './types';
-import * as XML from './xml';
 import { NS } from './const';
 import { sign } from './sign';
+import type { ServiceProviderOrganization, SpidConfig } from './types';
+import * as XML from './xml';
 
 export class SPMetadata extends XML.XML {
-  constructor(xml: string, private config: SpidConfig) {
+  constructor(
+    xml: string,
+    private config: SpidConfig,
+  ) {
     super(xml);
   }
 

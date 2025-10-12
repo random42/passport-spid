@@ -1,10 +1,9 @@
-import { SAML, SamlConfig } from '@node-saml/node-saml';
+import { SAML, type SamlConfig } from '@node-saml/node-saml';
+import { SpidRequest } from './request';
+import { SpidResponse } from './response';
 // import { signAuthnRequestPost } from '@node-saml/node-saml/lib/saml-post-signing';
 import { signAuthRequest } from './signAuthRequest';
-
-import { SpidRequest } from './request';
-import { SamlSpidProfile, SpidConfig } from './types';
-import { SpidResponse } from './response';
+import type { SamlSpidProfile, SpidConfig } from './types';
 
 type CacheData = {
   reqXml: string;
@@ -12,7 +11,10 @@ type CacheData = {
 };
 
 export class SpidSAML extends SAML {
-  constructor(samlConfig: SamlConfig, private spidConfig: SpidConfig) {
+  constructor(
+    samlConfig: SamlConfig,
+    private spidConfig: SpidConfig,
+  ) {
     super(samlConfig);
   }
 

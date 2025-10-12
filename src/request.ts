@@ -1,6 +1,6 @@
-import { XML } from './xml';
+import type { SamlOptions } from '@node-saml/node-saml/lib';
 import { ISSUER_FORMAT, NS } from './const';
-import { SamlOptions } from '@node-saml/node-saml/lib';
+import { XML } from './xml';
 
 export class SpidRequest extends XML {
   protected get request() {

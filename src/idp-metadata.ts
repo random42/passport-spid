@@ -1,6 +1,6 @@
-import { IDPConfig } from './types';
-import { parseDom } from './xml';
 import { NS } from './const';
+import type { IDPConfig } from './types';
+import { parseDom } from './xml';
 
 export const getIdentityProviders = (
   xml: string,

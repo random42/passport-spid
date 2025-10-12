@@ -1,12 +1,12 @@
+export { SpidRequest } from './request';
+export { SpidResponse } from './response';
+export { SpidStrategy } from './strategy';
 export {
-  SpidProfile,
+  Cache,
   PrivateServiceProvider,
   PublicServiceProvider,
-  ServiceProvider,
-  Cache,
-  SpidConfig,
   SamlSpidProfile,
+  ServiceProvider,
+  SpidConfig,
+  SpidProfile,
 } from './types';
-export { SpidStrategy } from './strategy';
-export { SpidResponse } from './response';
-export { SpidRequest } from './request';

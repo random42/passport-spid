@@ -1,9 +1,9 @@
 import { DOMParser, XMLSerializer } from '@xmldom/xmldom';
 import {
-  X2jOptionsOptional,
+  type X2jOptionsOptional,
   XMLBuilder,
-  XmlBuilderOptionsOptional,
   XMLParser,
+  type XmlBuilderOptionsOptional,
 } from 'fast-xml-parser';
 
 const TEXT = '#';

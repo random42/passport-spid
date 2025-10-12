@@ -1,8 +1,7 @@
+import assert from 'node:assert';
+import type { SamlOptions } from '@node-saml/node-saml/lib';
 import dayjs from 'dayjs';
-import assert from 'assert';
-import { SpidConfig } from './types';
-import * as XML from './xml';
-import { SpidRequest } from './request';
+import difference from 'lodash.difference';
 import {
   IDENTIFIER_FORMAT,
   ISSUER_FORMAT,
@@ -10,9 +9,10 @@ import {
   SPID_LEVELS,
   SUBJECT_CONFIRMATION_METHOD,
 } from './const';
-import { SamlOptions } from '@node-saml/node-saml/lib';
-import difference from 'lodash.difference';
+import type { SpidRequest } from './request';
+import type { SpidConfig } from './types';
 import { isISODateTimeUTC } from './util';
+import * as XML from './xml';
 
 export class SpidResponse extends XML.XML {
   validate(
@@ -205,7 +205,7 @@ export class SpidResponse extends XML.XML {
     const { authnContext } = data.assertion;
     const authnError = `Invalid AuthnContext "${data.assertion.authnContext}"`;
     assert(
-      Object.values(SPID_LEVELS).includes(authnContext as any),
+      (Object.values(SPID_LEVELS) as string[]).includes(authnContext),
       authnError,
     );
     const reqLevel = config.spid.authnContext;
@@ -226,12 +226,12 @@ export class SpidResponse extends XML.XML {
         break;
     }
     // AttributeStatement
-    const serviceIndex = parseInt(
+    const serviceIndex = Number(
       req
         .getElement('AuthnRequest', P)
         .getAttribute('AttributeConsumingServiceIndex'),
     );
-    assert(!isNaN(serviceIndex));
+    assert(!Number.isNaN(serviceIndex));
     const attributes = data.assertion.attributes.map((a) => a.name);
     const expected =
       config.spid.serviceProvider.acs[serviceIndex]?.attributes ?? [];

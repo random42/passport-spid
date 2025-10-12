@@ -1,23 +1,23 @@
+import { callbackify } from 'node:util';
 import {
   AbstractStrategy,
   MultiSamlStrategy,
-  SamlConfig,
+  type SamlConfig,
 } from '@node-saml/passport-saml';
-import type { Request } from 'express';
-import { callbackify } from 'util';
-import { getIdentityProviders } from './idp-metadata';
-import { SPMetadata } from './sp-metadata';
-import { IDPConfig, SamlSpidProfile, SpidConfig } from './types';
-import {
-  SPID_LEVELS,
-  SPID_FORCED_SAML_CONFIG,
-  FORCE_AUTHN_LEVELS,
-} from './const';
-import {
+import type {
   AuthenticateOptions,
   RequestWithUser,
 } from '@node-saml/passport-saml/lib/types';
+import type { Request } from 'express';
+import {
+  FORCE_AUTHN_LEVELS,
+  SPID_FORCED_SAML_CONFIG,
+  SPID_LEVELS,
+} from './const';
+import { getIdentityProviders } from './idp-metadata';
 import { SpidSAML } from './saml';
+import { SPMetadata } from './sp-metadata';
+import type { IDPConfig, SamlSpidProfile, SpidConfig } from './types';
 
 export type VerifiedCallback = (
   err: Error | null,

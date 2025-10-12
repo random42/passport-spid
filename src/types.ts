@@ -1,7 +1,7 @@
+import type { RacComparision } from '@node-saml/node-saml/lib/types';
+import type { Profile, SamlConfig } from '@node-saml/passport-saml';
 import type { Request } from 'express';
-import { SamlConfig, Profile } from '@node-saml/passport-saml';
-import { SPID_LEVELS, SPID_FORCED_SAML_CONFIG } from './const';
-import { RacComparision } from '@node-saml/node-saml/lib/types';
+import type { SPID_FORCED_SAML_CONFIG, SPID_LEVELS } from './const';
 
 export type SpidLevel = keyof typeof SPID_LEVELS;
 

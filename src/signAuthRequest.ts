@@ -15,8 +15,13 @@ export const signAuthRequest = (
     action?: 'prepend' | 'append' | 'after';
   },
 ) => {
-  const { privateKey, signatureAlgorithm, nodeName, certificate, action } =
-    options;
+  const {
+    privateKey,
+    signatureAlgorithm,
+    nodeName,
+    certificate,
+    action = 'after',
+  } = options;
   const sig = new SignedXml();
   sig.signingKey = privateKey;
   if (certificate)
@@ -36,7 +41,7 @@ export const signAuthRequest = (
     `http://www.w3.org/2001/04/xmlenc#${signatureAlgorithm}`,
   );
   sig.computeSignature(xml, {
-    location: { reference: authnRequestXPath + issuerXPath, action: 'after' },
+    location: { reference: authnRequestXPath + issuerXPath, action },
   });
   return sig.getSignedXml();
 };
