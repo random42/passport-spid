@@ -1,6 +1,7 @@
-import { IDPConfig } from './types';
-import { parseDom } from './xml';
+import assert from 'node:assert';
 import { NS } from './const';
+import type { IDPConfig } from './types';
+import { parseDom } from './xml';
 
 export const getIdentityProviders = (
   xml: string,
@@ -14,7 +15,7 @@ export const getIdentityProviders = (
     'urn:oasis:names:tc:SAML:2.0:bindings:' +
     (httpPost ? 'HTTP-POST' : 'HTTP-Redirect');
 
-  return idps.map((idp) => {
+  return idps.map((idp): IDPConfig => {
     const getLocation = (tag: string) =>
       Array.from(idp.getElementsByTagNameNS(NS.SAML_METADATA, tag))
         .find((x) => x.getAttribute('Binding') === binding)
@@ -27,7 +28,7 @@ export const getIdentityProviders = (
       idp.getElementsByTagNameNS(NS.SAML_METADATA, 'IDPSSODescriptor'),
     )[0];
 
-    let cert: string | null | undefined;
+    let idpCert: string | null | undefined;
     if (idpDescriptor) {
       const keyDescriptors = Array.from(
         idpDescriptor.getElementsByTagNameNS(NS.SAML_METADATA, 'KeyDescriptor'),
@@ -36,16 +37,31 @@ export const getIdentityProviders = (
       const signingDescriptor = keyDescriptors.find(
         (kd) => kd.getAttribute('use') === 'signing' || !kd.getAttribute('use'),
       );
-      cert = signingDescriptor
+      idpCert = signingDescriptor
         ?.getElementsByTagNameNS(NS.SIG, 'X509Certificate')
         .item(0)?.textContent;
     }
 
+    const entityId = idp.getAttribute('entityID');
+    const entryPoint = getLocation('SingleSignOnService');
+    const logoutUrl = getLocation('SingleLogoutService');
+
+    assert(entityId, 'IDP metadata entry missing entityID');
+    assert(idpCert, `IDP metadata for ${entityId} missing X509Certificate`);
+    assert(
+      entryPoint,
+      `IDP metadata for ${entityId} missing SingleSignOnService with binding ${binding}`,
+    );
+    assert(
+      logoutUrl,
+      `IDP metadata for ${entityId} missing SingleLogoutService with binding ${binding}`,
+    );
+
     return {
-      entityId: idp.getAttribute('entityID'),
-      cert,
-      entryPoint: getLocation('SingleSignOnService'),
-      logoutUrl: getLocation('SingleLogoutService'),
+      entityId,
+      idpCert,
+      entryPoint,
+      logoutUrl,
     };
   });
 };

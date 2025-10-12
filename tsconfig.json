@@ -1,11 +1,12 @@
 {
   "extends": "@tsconfig/recommended/tsconfig.json",
   "include": [
-    "src",
+    "src"
   ],
   "compilerOptions": {
     "module": "commonjs",
     "baseUrl": ".",
+    "strict": true,
     "declaration": true,
     "removeComments": true,
     "esModuleInterop": true,
@@ -13,9 +14,8 @@
     "outDir": "./dist",
     "incremental": true,
     "skipLibCheck": true,
-    "strictNullChecks": false,
     "noImplicitAny": false,
     "strictBindCallApply": false,
-    "forceConsistentCasingInFileNames": true,
+    "forceConsistentCasingInFileNames": true
   }
 }

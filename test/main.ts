@@ -1,13 +1,11 @@
+import axios from 'axios';
+import dotenv from 'dotenv';
 import express from 'express';
 import fs from 'fs-extra';
 import passport from 'passport';
-import { SpidStrategy, SpidConfig, SamlSpidProfile } from '../src';
-import dotenv from 'dotenv';
-import axios from 'axios';
+import { type SamlSpidProfile, type SpidConfig, SpidStrategy } from '../src';
 
 dotenv.config({ path: process.argv[2] });
-
-const sleep = (ms) => new Promise((res) => setTimeout(res, ms));
 
 const {
   IDP,
@@ -24,7 +22,7 @@ const {
 
 async function run() {
   const app = express();
-  let idpMetadata;
+  let idpMetadata: string;
   if (IDP_METADATA_FILE) {
     idpMetadata = (await fs.readFile(IDP_METADATA_FILE)).toString();
   } else if (IDP_METADATA_URL) {
@@ -89,7 +87,7 @@ async function run() {
   };
   app.use(
     express.json(),
-    (req, res, next) => {
+    (req, _res, next) => {
       console.error(
         JSON.stringify({
           path: req.path,
@@ -100,8 +98,8 @@ async function run() {
     },
     passport.initialize(),
   );
-  app.get('/', (req, res) => res.sendStatus(200));
-  app.get('/metadata', async (req, res) => {
+  app.get('/', (_req, res) => res.sendStatus(200));
+  app.get('/metadata', async (_req, res) => {
     // you should cache this
     res.contentType('text/xml');
     res.send(metadata);
@@ -119,11 +117,11 @@ async function run() {
       res.send(user);
     },
   );
-  app.use((err, req, res, next) => {
+  app.use((err, _req, res, _next) => {
     console.log(err);
     res.status(500).send(err?.message);
   });
-  app.listen(4000, '0.0.0.0', () => {
+  app.listen(4000, () => {
     console.log(SP);
     console.log(IDP);
   });

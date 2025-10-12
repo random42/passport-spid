@@ -12,24 +12,26 @@ export const sign = (
 ) => {
   const { privateKey, signatureAlgorithm, nodeName, certificate, action } =
     options;
-  const sig = new SignedXml();
-  sig.signingKey = privateKey;
-  if (certificate)
-    sig.keyInfoProvider = {
-      file: '',
-      getKey: () => Buffer.from(privateKey),
-      getKeyInfo: () =>
-        `<X509Data><X509Certificate>${certificate}</X509Certificate></X509Data>`,
-    };
-  sig.signatureAlgorithm = `http://www.w3.org/2001/04/xmldsig-more#rsa-${signatureAlgorithm}`;
-  sig.addReference(
-    `//*[local-name(.)='${nodeName}']`,
-    [
+  const sig = new SignedXml({
+    privateKey,
+    publicCert: certificate,
+    signatureAlgorithm: `http://www.w3.org/2001/04/xmldsig-more#rsa-${signatureAlgorithm}`,
+  });
+
+  if (certificate) {
+    sig.getKeyInfoContent = () =>
+      `<X509Data><X509Certificate>${certificate}</X509Certificate></X509Data>`;
+  }
+
+  sig.addReference({
+    xpath: `//*[local-name(.)='${nodeName}']`,
+    transforms: [
       'http://www.w3.org/2000/09/xmldsig#enveloped-signature',
       'http://www.w3.org/2001/10/xml-exc-c14n#',
     ],
-    `http://www.w3.org/2001/04/xmlenc#${signatureAlgorithm}`,
-  );
+    digestAlgorithm: `http://www.w3.org/2001/04/xmlenc#${signatureAlgorithm}`,
+  });
+  sig.canonicalizationAlgorithm = 'http://www.w3.org/2001/10/xml-exc-c14n#';
   sig.computeSignature(xml, {
     location: { reference: '', action: action ?? 'append' },
   });

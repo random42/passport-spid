@@ -1,23 +1,23 @@
+import { callbackify } from 'node:util';
 import {
   AbstractStrategy,
   MultiSamlStrategy,
-  SamlConfig,
+  type SamlConfig,
 } from '@node-saml/passport-saml';
-import type { Request } from 'express';
-import { callbackify } from 'util';
-import { getIdentityProviders } from './idp-metadata';
-import { SPMetadata } from './sp-metadata';
-import { IDPConfig, SamlSpidProfile, SpidConfig } from './types';
-import {
-  SPID_LEVELS,
-  SPID_FORCED_SAML_CONFIG,
-  FORCE_AUTHN_LEVELS,
-} from './const';
-import {
+import type {
   AuthenticateOptions,
   RequestWithUser,
 } from '@node-saml/passport-saml/lib/types';
+import type { Request } from 'express';
+import {
+  FORCE_AUTHN_LEVELS,
+  SPID_FORCED_SAML_CONFIG,
+  SPID_LEVELS,
+} from './const';
+import { getIdentityProviders } from './idp-metadata';
 import { SpidSAML } from './saml';
+import { SPMetadata } from './sp-metadata';
+import type { IDPConfig, SamlSpidProfile, SpidConfig } from './types';
 
 export type VerifiedCallback = (
   err: Error | null,
@@ -43,7 +43,7 @@ const cleanPem = (cert: string) =>
     .replace(/\r?\n/g, '');
 
 export class SpidStrategy extends MultiSamlStrategy {
-  private idps: IDPConfig[];
+  private idps!: IDPConfig[];
   private _spidConfig: SpidConfig;
 
   constructor(
@@ -77,7 +77,7 @@ export class SpidStrategy extends MultiSamlStrategy {
     return this._spidConfig;
   }
 
-  authenticate(req: RequestWithUser, options: AuthenticateOptions): void {
+  authenticate(req: Request, options: AuthenticateOptions): void {
     this._getSpidSamlOptions(req)
       .then((config) => {
         const saml = new SpidSAML(config, this.getSpidConfig());
@@ -85,7 +85,7 @@ export class SpidStrategy extends MultiSamlStrategy {
         Object.setPrototypeOf(strategy, this);
         return AbstractStrategy.prototype.authenticate.call(
           strategy,
-          req,
+          req as unknown as RequestWithUser,
           options,
         );
       })
@@ -120,36 +120,40 @@ export class SpidStrategy extends MultiSamlStrategy {
     }
     idp ??= idps[0]; // default for metadata generation
     const { authnContext } = config.spid;
-    return Object.assign(
-      {},
-      saml,
-      {
-        additionalParams: saml.additionalParams ?? { RelayState: 'RelayState' },
-        authnContext: [SPID_LEVELS[config.spid.authnContext]],
-        forceAuthn: FORCE_AUTHN_LEVELS.includes(authnContext),
-        passReqToCallback: config.passReqToCallback,
-        issuer: spid.serviceProvider.entityId,
-        idpIssuer: idp.entityId,
-        entryPoint: idp.entryPoint,
-        logoutUrl: idp.logoutUrl,
-        cert: idp.cert,
-        skipRequestCompression: saml.authnRequestBinding === 'HTTP-POST',
-      },
-      SPID_FORCED_SAML_CONFIG,
-    );
+
+    // idpCert is required in node-saml v5
+    if (!idp.idpCert) {
+      throw new Error(`IDP certificate not found for '${idp.entityId}'`);
+    }
+
+    return {
+      ...saml,
+      additionalParams: saml.additionalParams ?? { RelayState: 'RelayState' },
+      authnContext: [SPID_LEVELS[config.spid.authnContext]],
+      forceAuthn: FORCE_AUTHN_LEVELS.includes(authnContext),
+      issuer: spid.serviceProvider.entityId,
+      idpIssuer: idp.entityId,
+      entryPoint: idp.entryPoint,
+      logoutUrl: idp.logoutUrl,
+      idpCert: idp.idpCert,
+
+      skipRequestCompression: saml.authnRequestBinding === 'HTTP-POST',
+      ...SPID_FORCED_SAML_CONFIG,
+    };
   }
 
   async generateSpidServiceProviderMetadata() {
     const config = this.getSpidConfig();
     const { certificate } = config.spid.serviceProvider;
-    return new Promise((res, rej) => {
+    return new Promise<string>((res, rej) => {
       super.generateServiceProviderMetadata(
         {} as any,
         null,
         certificate,
         (err, xml) => {
           if (err) rej(err);
-          else res(new SPMetadata(xml, config).generate());
+          else if (xml) res(new SPMetadata(xml, config).generate());
+          else rej(new Error('Failed to generate SP metadata'));
         },
       );
     });
