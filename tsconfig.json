@@ -2,12 +2,6 @@
   "extends": "@tsconfig/recommended/tsconfig.json",
   "include": [
     "src",
-    "examples",
-    "test"
-  ],
-  "exclude": [
-    "node_modules",
-    "dist"
   ],
   "compilerOptions": {
     "module": "commonjs",
