@@ -77,7 +77,6 @@ export class SpidStrategy extends MultiSamlStrategy {
     return this._spidConfig;
   }
 
-  // @ts-expect-error - Express type conflict between versions in dependencies
   authenticate(req: Request, options: AuthenticateOptions): void {
     this._getSpidSamlOptions(req)
       .then((config) => {
