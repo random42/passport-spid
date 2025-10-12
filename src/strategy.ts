@@ -1,3 +1,4 @@
+import { X509Certificate } from 'node:crypto';
 import { callbackify } from 'node:util';
 import {
   AbstractStrategy,
@@ -36,11 +37,9 @@ export type VerifyWithoutRequest = (
   done: VerifiedCallback,
 ) => void;
 
-const cleanPem = (cert: string) =>
-  cert
-    .replace(/.*BEGIN.*\r?\n?/, '')
-    .replace(/.*END.*\r?\n?/, '')
-    .replace(/\r?\n/g, '');
+const cleanPem = (cert: string) => {
+  return new X509Certificate(cert).raw.toString('base64');
+};
 
 export class SpidStrategy extends MultiSamlStrategy {
   private idps!: IDPConfig[];
