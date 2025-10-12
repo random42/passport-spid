@@ -133,9 +133,9 @@ export class SpidStrategy extends MultiSamlStrategy {
       authnContext: [SPID_LEVELS[config.spid.authnContext]],
       forceAuthn: FORCE_AUTHN_LEVELS.includes(authnContext),
       issuer: spid.serviceProvider.entityId,
-      idpIssuer: idp.entityId ?? undefined,
-      entryPoint: idp.entryPoint ?? undefined,
-      logoutUrl: idp.logoutUrl ?? undefined,
+      idpIssuer: idp.entityId,
+      entryPoint: idp.entryPoint,
+      logoutUrl: idp.logoutUrl,
       idpCert: idp.idpCert,
 
       skipRequestCompression: saml.authnRequestBinding === 'HTTP-POST',
