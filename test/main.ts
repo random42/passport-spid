@@ -121,7 +121,7 @@ async function run() {
     console.log(err);
     res.status(500).send(err?.message);
   });
-  app.listen(4000, '0.0.0.0', () => {
+  app.listen(4000, () => {
     console.log(SP);
     console.log(IDP);
   });

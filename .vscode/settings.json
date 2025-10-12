@@ -6,6 +6,9 @@
     "source.fixAll.biome": "explicit"
   },
   "chat.tools.terminal.autoApprove": {
-    "docker": true
+    "docker compose": true,
+    "npm run build": true,
+    "npm test": true,
+    "npm run check": true
   }
 }

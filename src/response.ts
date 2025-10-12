@@ -175,7 +175,8 @@ export class SpidResponse extends XML.XML {
       `Invalid SubjectConfirmation`,
     );
     assert(
-      isISODateTimeUTC(data.subject.confirmation.data.notOnOrAfter),
+      data.subject.confirmation.data.notOnOrAfter &&
+        isISODateTimeUTC(data.subject.confirmation.data.notOnOrAfter),
       `Invalid SubjectConfirmation`,
     );
     assert(
@@ -186,7 +187,8 @@ export class SpidResponse extends XML.XML {
     );
     // Conditions
     assert(
-      isISODateTimeUTC(data.assertion.conditions.notBefore),
+      data.assertion.conditions.notBefore &&
+        isISODateTimeUTC(data.assertion.conditions.notBefore),
       `Invalid Conditions`,
     );
     assert(
@@ -194,7 +196,8 @@ export class SpidResponse extends XML.XML {
       `Invalid Conditions`,
     );
     assert(
-      isISODateTimeUTC(data.assertion.conditions.notOnOrAfter),
+      data.assertion.conditions.notOnOrAfter &&
+        isISODateTimeUTC(data.assertion.conditions.notOnOrAfter),
       `Invalid Conditions`,
     );
     assert(
@@ -260,7 +263,9 @@ export class SpidResponse extends XML.XML {
   }
 
   get id(): string {
-    return this.response?.getAttribute('ID');
+    const id = this.response?.getAttribute('ID');
+    if (!id) throw new Error('Missing ID in Response');
+    return id;
   }
 
   get statusCode() {
@@ -270,14 +275,20 @@ export class SpidResponse extends XML.XML {
   }
 
   get inResponseTo(): string {
-    return this.response?.getAttribute('InResponseTo');
+    const inResponseTo = this.response?.getAttribute('InResponseTo');
+    if (!inResponseTo) throw new Error('Missing InResponseTo in Response');
+    return inResponseTo;
   }
 
   get issueInstant(): Date {
-    return new Date(this.response?.getAttribute('IssueInstant'));
+    const instant = this.response?.getAttribute('IssueInstant');
+    if (!instant) throw new Error('Missing IssueInstant in Response');
+    return new Date(instant);
   }
 
   get issuer(): string {
-    return this.getElement('Issuer', NS.SAML_ASSERTION)?.textContent;
+    const issuer = this.getElement('Issuer', NS.SAML_ASSERTION)?.textContent;
+    if (!issuer) throw new Error('Missing Issuer in Response');
+    return issuer;
   }
 }

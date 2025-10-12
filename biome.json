@@ -16,7 +16,8 @@
       "recommended": true,
       "suspicious": {
         "noExplicitAny": "off",
-        "useIterableCallbackReturn": "off"
+        "useIterableCallbackReturn": "off",
+        "noImplicitAnyLet": "off"
       }
     }
   },

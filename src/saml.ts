@@ -7,7 +7,7 @@ import type { SamlSpidProfile, SpidConfig } from './types';
 
 type CacheData = {
   reqXml: string;
-  idpIssuer: string;
+  idpIssuer: string | undefined;
 };
 
 export class SpidSAML extends SAML {
@@ -21,13 +21,11 @@ export class SpidSAML extends SAML {
   protected async generateAuthorizeRequestAsync(
     isPassive: boolean,
     isHttpPostBinding: boolean,
-    host: string,
   ): Promise<string> {
     // cannot use super because these are instance functions
     let xml = await super.generateAuthorizeRequestAsync(
       isPassive,
       isHttpPostBinding,
-      host,
     );
     const req = new SpidRequest(xml);
     const id = req.id;
@@ -76,6 +74,11 @@ export class SpidSAML extends SAML {
     }
     const { cache } = this.spidConfig;
     const cacheDataJSON = await cache.get(inResponseTo);
+    if (!cacheDataJSON) {
+      throw new Error(
+        `No cached request found for InResponseTo: ${inResponseTo}`,
+      );
+    }
     const cacheData = JSON.parse(cacheDataJSON) as CacheData;
     const { reqXml } = cacheData;
     if (!reqXml) {
@@ -90,7 +93,11 @@ export class SpidSAML extends SAML {
         samlResponseXml,
         inResponseTo,
       );
-    res.validate(req, this.spidConfig, this.options, cacheData.idpIssuer);
+    const idpIssuer = cacheData.idpIssuer;
+    if (!idpIssuer) {
+      throw new Error('Missing idpIssuer in cached request data');
+    }
+    res.validate(req, this.spidConfig, this.options, idpIssuer);
     const p = profile as SamlSpidProfile;
     p.getSamlRequestXml = () => reqXml;
     return { profile: p, loggedOut };
