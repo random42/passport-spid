@@ -4,9 +4,19 @@ on:
   push:
     branches:
       - main
+    paths:
+      - 'src/**'
+      - 'test/**'
+      - 'package.json'
+      - 'test.sh'
   pull_request:
     branches:
       - main
+    paths:
+      - 'src/**'
+      - 'test/**'
+      - 'package.json'
+      - 'test.sh'
   workflow_dispatch:
 jobs:
   test:
