@@ -1,0 +1,26 @@
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+      time: "04:00"
+    commit-message:
+      prefix: "deps"
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+      - "automated"
+    groups:
+      all-dependencies:
+        patterns:
+          - "*" # This groups all dependencies into one PR
+    ignore:
+      - dependency-name: "typescript"
+    # reviewers:
+    #   - "your-github-username"
+    # assignees:
+    #   - "your-github-username"
+    # ignore:
+    #   - dependency-name: "example-package"
+    #     versions: ["1.x"]
