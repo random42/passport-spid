@@ -72,7 +72,7 @@ export const getIdentityProviders = (
 
     return {
       entityId: idp.getAttribute('entityID'),
-      cert: getIdpCert(idp),
+      idpCert: getIdpCert(idp),
       entryPoint: getLocation('SingleSignOnService'),
       logoutUrl: getLocation('SingleLogoutService'),
     };
