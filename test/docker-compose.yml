@@ -27,10 +27,10 @@ services:
     command: "npm run dev" 
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:4000"]
-      interval: 3s
+      interval: 5s
       timeout: 5s
-      retries: 3
-      start_period: 3s
+      retries: 5
+      start_period: 10s
     depends_on:
       keygen:
         condition: service_completed_successfully
@@ -40,7 +40,7 @@ services:
       - config:/app/config:ro
     environment:
       NODE_TLS_REJECT_UNAUTHORIZED: 0
-      IDP: "https://localhost:8080"
+      IDP: "https://localhost:8443"
       SP: "http://web:4000"
       IDP_METADATA_FILE: "config/idp.xml"
       PRIVATE_KEY_FILE: "config/key.pem"

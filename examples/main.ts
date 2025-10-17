@@ -2,7 +2,12 @@ import express from 'express';
 import fs from 'fs-extra';
 import Redis from 'ioredis';
 import passport from 'passport';
-import { SpidStrategy, SpidConfig, SamlSpidProfile, Cache } from '../src';
+import {
+  type Cache,
+  type SamlSpidProfile,
+  type SpidConfig,
+  SpidStrategy,
+} from '../src';
 
 async function run() {
   const app = express();
@@ -45,7 +50,7 @@ async function run() {
       audience: sp,
     },
     spid: {
-      getIDPEntityIdFromRequest: (req) => idp,
+      getIDPEntityIdFromRequest: (_req) => idp,
       IDPRegistryMetadata: idpMetadata,
       authnContext: 1, // spid level (1/2/3)
       serviceProvider: {
@@ -87,7 +92,7 @@ async function run() {
     session: false,
   };
   app.use(passport.initialize());
-  app.get('/metadata', async (req, res) => {
+  app.get('/metadata', async (_req, res) => {
     res.contentType('text/xml');
     res.send(metadata);
   });
@@ -99,8 +104,8 @@ async function run() {
     (req, res) => {
       const user = req.user as SamlSpidProfile;
       // you can save request and response
-      const samlRequest = user.getSamlRequestXml();
-      const samlResponse = user.getSamlResponseXml();
+      const _samlRequest = user.getSamlRequestXml();
+      const _samlResponse = user.getSamlResponseXml();
       res.send(user);
     },
   );

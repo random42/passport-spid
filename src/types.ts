@@ -1,7 +1,7 @@
+import type { RacComparison as NodeSamlRacComparison } from '@node-saml/node-saml/lib/types';
+import type { Profile, SamlConfig } from '@node-saml/passport-saml';
 import type { Request } from 'express';
-import { SamlConfig, Profile } from '@node-saml/passport-saml';
-import { SPID_LEVELS, SPID_FORCED_SAML_CONFIG } from './const';
-import { RacComparision } from '@node-saml/node-saml/lib/types';
+import type { SPID_FORCED_SAML_CONFIG, SPID_LEVELS } from './const';
 
 export type SpidLevel = keyof typeof SPID_LEVELS;
 
@@ -26,7 +26,7 @@ export interface SpidProfile {
 export type SpidAttribute = keyof SpidProfile;
 
 export interface IDPConfig
-  extends Required<Pick<SamlConfig, 'cert' | 'entryPoint' | 'logoutUrl'>> {
+  extends Required<Pick<SamlConfig, 'idpCert' | 'entryPoint' | 'logoutUrl'>> {
   entityId: string;
 }
 
@@ -106,11 +106,11 @@ export type ServiceProvider = PrivateServiceProvider | PublicServiceProvider;
 export type SignatureAlgorithm = 'sha256' | 'sha512';
 export type DigestAlgorithm = 'sha256' | 'sha512';
 export type Binding = 'HTTP-Redirect' | 'HTTP-POST';
-export type RacComparison = Exclude<RacComparision, 'better'>;
+export type RacComparison = Exclude<NodeSamlRacComparison, 'better'>;
 
 export type ForcedSamlConfig = keyof typeof SPID_FORCED_SAML_CONFIG;
 export type DynamicSamlConfig =
-  | 'cert'
+  | 'idpCert'
   | 'entryPoint'
   | 'logoutUrl'
   | 'issuer'

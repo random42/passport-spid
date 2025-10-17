@@ -1,6 +1,6 @@
-import { XML } from './xml';
+import type { SamlOptions } from '@node-saml/node-saml/lib';
 import { ISSUER_FORMAT, NS } from './const';
-import { SamlOptions } from '@node-saml/node-saml/lib';
+import { XML } from './xml';
 
 export class SpidRequest extends XML {
   protected get request() {
@@ -8,11 +8,16 @@ export class SpidRequest extends XML {
   }
 
   get id(): string {
-    return this.request.getAttribute('ID');
+    const id = this.request.getAttribute('ID');
+    if (!id) throw new Error('Missing ID attribute in AuthnRequest');
+    return id;
   }
 
   get issueInstant(): Date {
-    return new Date(this.request.getAttribute('IssueInstant'));
+    const instant = this.request.getAttribute('IssueInstant');
+    if (!instant)
+      throw new Error('Missing IssueInstant attribute in AuthnRequest');
+    return new Date(instant);
   }
 
   generate(options: SamlOptions) {

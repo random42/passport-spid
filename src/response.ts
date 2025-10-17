@@ -1,8 +1,7 @@
+import assert from 'node:assert';
+import type { SamlOptions } from '@node-saml/node-saml/lib';
 import dayjs from 'dayjs';
-import assert from 'assert';
-import { SpidConfig } from './types';
-import * as XML from './xml';
-import { SpidRequest } from './request';
+import difference from 'lodash.difference';
 import {
   IDENTIFIER_FORMAT,
   ISSUER_FORMAT,
@@ -10,9 +9,10 @@ import {
   SPID_LEVELS,
   SUBJECT_CONFIRMATION_METHOD,
 } from './const';
-import { SamlOptions } from '@node-saml/node-saml/lib';
-import difference from 'lodash.difference';
+import type { SpidRequest } from './request';
+import type { SpidConfig } from './types';
 import { isISODateTimeUTC } from './util';
+import * as XML from './xml';
 
 export class SpidResponse extends XML.XML {
   validate(
@@ -175,7 +175,8 @@ export class SpidResponse extends XML.XML {
       `Invalid SubjectConfirmation`,
     );
     assert(
-      isISODateTimeUTC(data.subject.confirmation.data.notOnOrAfter),
+      data.subject.confirmation.data.notOnOrAfter &&
+        isISODateTimeUTC(data.subject.confirmation.data.notOnOrAfter),
       `Invalid SubjectConfirmation`,
     );
     assert(
@@ -186,7 +187,8 @@ export class SpidResponse extends XML.XML {
     );
     // Conditions
     assert(
-      isISODateTimeUTC(data.assertion.conditions.notBefore),
+      data.assertion.conditions.notBefore &&
+        isISODateTimeUTC(data.assertion.conditions.notBefore),
       `Invalid Conditions`,
     );
     assert(
@@ -194,7 +196,8 @@ export class SpidResponse extends XML.XML {
       `Invalid Conditions`,
     );
     assert(
-      isISODateTimeUTC(data.assertion.conditions.notOnOrAfter),
+      data.assertion.conditions.notOnOrAfter &&
+        isISODateTimeUTC(data.assertion.conditions.notOnOrAfter),
       `Invalid Conditions`,
     );
     assert(
@@ -205,7 +208,7 @@ export class SpidResponse extends XML.XML {
     const { authnContext } = data.assertion;
     const authnError = `Invalid AuthnContext "${data.assertion.authnContext}"`;
     assert(
-      Object.values(SPID_LEVELS).includes(authnContext as any),
+      (Object.values(SPID_LEVELS) as string[]).includes(authnContext),
       authnError,
     );
     const reqLevel = config.spid.authnContext;
@@ -226,12 +229,12 @@ export class SpidResponse extends XML.XML {
         break;
     }
     // AttributeStatement
-    const serviceIndex = parseInt(
+    const serviceIndex = Number(
       req
         .getElement('AuthnRequest', P)
         .getAttribute('AttributeConsumingServiceIndex'),
     );
-    assert(!isNaN(serviceIndex));
+    assert(!Number.isNaN(serviceIndex));
     const attributes = data.assertion.attributes.map((a) => a.name);
     const expected =
       config.spid.serviceProvider.acs[serviceIndex]?.attributes ?? [];
@@ -260,7 +263,9 @@ export class SpidResponse extends XML.XML {
   }
 
   get id(): string {
-    return this.response?.getAttribute('ID');
+    const id = this.response?.getAttribute('ID');
+    if (!id) throw new Error('Missing ID in Response');
+    return id;
   }
 
   get statusCode() {
@@ -270,14 +275,20 @@ export class SpidResponse extends XML.XML {
   }
 
   get inResponseTo(): string {
-    return this.response?.getAttribute('InResponseTo');
+    const inResponseTo = this.response?.getAttribute('InResponseTo');
+    if (!inResponseTo) throw new Error('Missing InResponseTo in Response');
+    return inResponseTo;
   }
 
   get issueInstant(): Date {
-    return new Date(this.response?.getAttribute('IssueInstant'));
+    const instant = this.response?.getAttribute('IssueInstant');
+    if (!instant) throw new Error('Missing IssueInstant in Response');
+    return new Date(instant);
   }
 
   get issuer(): string {
-    return this.getElement('Issuer', NS.SAML_ASSERTION)?.textContent;
+    const issuer = this.getElement('Issuer', NS.SAML_ASSERTION)?.textContent;
+    if (!issuer) throw new Error('Missing Issuer in Response');
+    return issuer;
   }
 }

@@ -4,16 +4,24 @@ on:
   push:
     branches:
       - main
+    paths:
+      - 'src/**'
+      - 'test/**'
+      - 'package.json'
+      - 'test.sh'
   pull_request:
     branches:
       - main
+    paths:
+      - 'src/**'
+      - 'test/**'
+      - 'package.json'
+      - 'test.sh'
   workflow_dispatch:
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: docker-practice/actions-setup-docker@master
-        with:
-          docker_version: 27.2
       - run: bash ./test.sh

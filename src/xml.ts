@@ -1,15 +1,15 @@
 import { DOMParser, XMLSerializer } from '@xmldom/xmldom';
 import {
-  X2jOptionsOptional,
+  type X2jOptions,
   XMLBuilder,
-  XmlBuilderOptionsOptional,
   XMLParser,
+  type XmlBuilderOptions,
 } from 'fast-xml-parser';
 
 const TEXT = '#';
 const ATTR = '@';
 
-const OPTIONS: X2jOptionsOptional & XmlBuilderOptionsOptional = {
+const OPTIONS: X2jOptions & XmlBuilderOptions = {
   ignoreAttributes: false,
   attributesGroupName: ATTR,
   attributeNamePrefix: '',
@@ -47,16 +47,16 @@ export const build = builder.build.bind(builder) as XMLBuilder['build'];
 export const nodesFromObject = (x) => {
   const xml = `<root>${build(x)}</root>`;
   const dom = parseDom(xml);
-  return Array.from(dom.firstChild.childNodes);
+  const firstChild = dom.firstChild;
+  if (!firstChild) {
+    throw new Error('Failed to parse XML object');
+  }
+  return Array.from(firstChild.childNodes);
 };
 
 export class XML {
   protected dom: Document;
   constructor(xml: string) {
-    this.load(xml);
-  }
-
-  public load(xml: string) {
     this.dom = parseDom(xml);
   }
 

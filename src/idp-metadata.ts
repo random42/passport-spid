@@ -1,5 +1,4 @@
-import { IDPConfig } from './types';
-import { parseDom } from './xml';
+import assert from 'node:assert';
 import { NS } from './const';
 import { X509Certificate } from 'crypto';
 
@@ -65,13 +64,11 @@ export const getIdentityProviders = (
     'urn:oasis:names:tc:SAML:2.0:bindings:' +
     (httpPost ? 'HTTP-POST' : 'HTTP-Redirect');
 
-  return idps.map((idp) => {
+  return idps.map((idp): IDPConfig => {
     const getLocation = (tag: string) =>
       Array.from(idp.getElementsByTagNameNS(NS.SAML_METADATA, tag))
         .find((x) => x.getAttribute('Binding') === binding)
         ?.getAttribute('Location');
-
-    // Find a not expired X509Certificate in a keyDescriptor use="signing"
 
     return {
       entityId: idp.getAttribute('entityID'),
