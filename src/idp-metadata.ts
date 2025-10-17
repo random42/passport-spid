@@ -1,7 +1,58 @@
 import assert from 'node:assert';
+import { X509Certificate } from 'node:crypto';
 import { NS } from './const';
 import type { IDPConfig } from './types';
 import { parseDom } from './xml';
+
+// Gets first (valid if possible) signing certificate
+const getIdpCertificate = (idp: Element): string | null => {
+  const idpDescriptor = Array.from(
+    idp.getElementsByTagNameNS(NS.SAML_METADATA, 'IDPSSODescriptor'),
+  )[0];
+
+  if (!idpDescriptor) return null;
+
+  const keyDescriptors = Array.from(
+    idpDescriptor.getElementsByTagNameNS(NS.SAML_METADATA, 'KeyDescriptor'),
+  );
+  // Look for KeyDescriptor with use="signing" or without use attribute (means both)
+  const signingDescriptorCollection = keyDescriptors.filter(
+    (kd) => kd.getAttribute('use') === 'signing' || !kd.getAttribute('use'),
+  );
+
+  const certificates: string[] = [];
+
+  Array.from(signingDescriptorCollection).forEach((kd) => {
+    const certificateCollection = kd.getElementsByTagNameNS(
+      NS.SIG,
+      'X509Certificate',
+    );
+    Array.from(certificateCollection || []).forEach((el) => {
+      const textContent = el.textContent;
+      if (textContent) {
+        const sanitized = textContent.replace(/\s+/g, '');
+        if (sanitized) certificates.push(sanitized);
+      }
+    });
+  });
+
+  const now = new Date();
+  const validCert = certificates.find((certificate) => {
+    const pemBody = certificate.match(/.{1,64}/g)?.join('\n') ?? certificate;
+    const pemCert = `-----BEGIN CERTIFICATE-----\n${pemBody}\n-----END CERTIFICATE-----`;
+
+    try {
+      const parsed = new X509Certificate(pemCert);
+      const notBefore = new Date(parsed.validFrom);
+      const notAfter = new Date(parsed.validTo);
+      return notBefore <= now && now <= notAfter;
+    } catch {
+      return false;
+    }
+  });
+
+  return validCert ?? certificates[0] ?? null;
+};
 
 export const getIdentityProviders = (
   xml: string,
@@ -21,27 +72,7 @@ export const getIdentityProviders = (
         .find((x) => x.getAttribute('Binding') === binding)
         ?.getAttribute('Location');
 
-    // Get certificate from IDPSSODescriptor > KeyDescriptor with use="signing"
-    // According to SAML2 spec, the signing certificate should be in KeyDescriptor[use="signing"]
-    // within IDPSSODescriptor, not from the metadata signature
-    const idpDescriptor = Array.from(
-      idp.getElementsByTagNameNS(NS.SAML_METADATA, 'IDPSSODescriptor'),
-    )[0];
-
-    let idpCert: string | null | undefined;
-    if (idpDescriptor) {
-      const keyDescriptors = Array.from(
-        idpDescriptor.getElementsByTagNameNS(NS.SAML_METADATA, 'KeyDescriptor'),
-      );
-      // Look for KeyDescriptor with use="signing" or without use attribute (means both)
-      const signingDescriptor = keyDescriptors.find(
-        (kd) => kd.getAttribute('use') === 'signing' || !kd.getAttribute('use'),
-      );
-      idpCert = signingDescriptor
-        ?.getElementsByTagNameNS(NS.SIG, 'X509Certificate')
-        .item(0)?.textContent;
-    }
-
+    const idpCert = getIdpCertificate(idp);
     const entityId = idp.getAttribute('entityID');
     const entryPoint = getLocation('SingleSignOnService');
     const logoutUrl = getLocation('SingleLogoutService');
